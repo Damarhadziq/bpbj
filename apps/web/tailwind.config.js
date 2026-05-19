@@ -1,0 +1,74 @@
+import forms from '@tailwindcss/forms';
+import containerQueries from '@tailwindcss/container-queries';
+
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "on-surface": "#191c1d",
+        "tertiary-container": "#0052f9",
+        "primary-container": "#cc0000",
+        "surface-variant": "#e1e3e4",
+        "inverse-on-surface": "#f0f1f2",
+        "surface-container-highest": "#e1e3e4",
+        "on-secondary": "#ffffff",
+        "secondary-container": "#cfe6f2",
+        "on-tertiary-fixed": "#001551",
+        "on-surface-variant": "#5e3f3a",
+        "inverse-surface": "#2e3132",
+        "on-secondary-fixed": "#071e27",
+        "surface-tint": "#c00000",
+        "on-primary-fixed-variant": "#930000",
+        "secondary-fixed-dim": "#b4cad6",
+        "secondary-fixed": "#cfe6f2",
+        "on-tertiary-fixed-variant": "#0039b4",
+        "on-primary": "#ffffff",
+        "surface-container-lowest": "#ffffff",
+        "outline": "#926e69",
+        "surface-bright": "#f8f9fa",
+        "on-error-container": "#93000a",
+        "on-tertiary-container": "#dce1ff",
+        "surface-container-high": "#e7e8e9",
+        "on-secondary-fixed-variant": "#354a53",
+        "tertiary-fixed": "#dce1ff",
+        "surface": "#f8f9fa",
+        "inverse-primary": "#ffb4a8",
+        "secondary": "#4c616c",
+        "surface-dim": "#d9dadb",
+        "surface-container": "#edeeef",
+        "on-background": "#191c1d",
+        "on-error": "#ffffff",
+        "primary": "#9e0000",
+        "tertiary": "#003ec2",
+        "surface-container-low": "#f3f4f5",
+        "outline-variant": "#e8bdb6",
+        "error-container": "#ffdad6",
+        "error": "#ba1a1a",
+        "on-primary-fixed": "#410000",
+        "primary-fixed": "#ffdad4",
+        "tertiary-fixed-dim": "#b7c4ff",
+        "on-primary-container": "#ffdad4",
+        "primary-fixed-dim": "#ffb4a8",
+        "on-secondary-container": "#526772",
+        "background": "#f8f9fa",
+        "on-tertiary": "#ffffff"
+      },
+      fontFamily: {
+        "headline": ["Inter"],
+        "body": ["Inter"],
+        "label": ["Inter"]
+      },
+      borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+    },
+  },
+  plugins: [
+    forms,
+    containerQueries,
+  ],
+}
