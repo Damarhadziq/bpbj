@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import Navbar from './components/Navbar';
@@ -23,8 +24,13 @@ import AdminWelcome from './pages/admin/AdminWelcome';
 import AdminContacts from './pages/admin/AdminContacts';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminCarousel from './pages/admin/AdminCarousel';
+import { trackVisit } from './utils/visitorTracker';
 
 function App() {
+  useEffect(() => {
+    trackVisit();
+  }, []);
+
   return (
     <HelmetProvider>
       <BrowserRouter>

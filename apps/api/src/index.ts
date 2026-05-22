@@ -29,6 +29,7 @@ import contactsRouter from './routes/contacts';
 import galleryRouter from './routes/gallery';
 import usersRouter from './routes/users';
 import carouselRouter from './routes/carousel';
+import analyticsRouter from './routes/analytics';
 
 // App routes
 app.use('/api/v1/welcome-message', welcomeRouter);
@@ -37,6 +38,7 @@ app.use('/api/v1/contacts', contactsRouter);
 app.use('/api/v1/gallery', galleryRouter);
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/carousel', carouselRouter);
+app.use('/api/v1/analytics', analyticsRouter);
 
 // Basic healthcheck
 app.get('/api/v1/health', (req, res) => {

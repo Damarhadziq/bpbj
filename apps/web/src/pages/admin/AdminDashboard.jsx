@@ -4,6 +4,9 @@ import { useGallery } from '../../hooks/useGallery';
 import { useNews } from '../../hooks/useNews';
 import { useUsers } from '../../hooks/useUsers';
 import { useCarousel } from '../../hooks/useCarousel';
+import PublicationTrendChart from '../../components/admin/charts/PublicationTrendChart';
+import CategoryNewsChart from '../../components/admin/charts/CategoryNewsChart';
+import VisitorAnalyticsChart from '../../components/admin/charts/VisitorAnalyticsChart';
 
 export default function AdminDashboard() {
   const { data: session } = useSession();
@@ -33,12 +36,12 @@ export default function AdminDashboard() {
           { label: 'Total Berita', value: news.length, icon: 'article', color: 'bg-blue-50 text-blue-600' },
           { label: 'Galeri Foto', value: gallery.length, icon: 'photo_library', color: 'bg-emerald-50 text-emerald-600' },
           { label: 'Pesan Baru', value: unreadContacts, icon: 'mail', color: 'bg-amber-50 text-amber-600' },
-          { label: 'Admin Aktif', value: isSuperadmin ? users.length : '-', icon: 'shield_person', color: 'bg-purple-50 text-purple-600' },
+          { label: 'Admin Aktif', value: isSuperadmin ? users.length : '-', icon: 'shadow', color: 'bg-purple-50 text-purple-600' },
           { label: 'Carousel Aktif', value: carousel.filter((item) => item.isActive).length, icon: 'view_carousel', color: 'bg-rose-50 text-rose-600' },
         ].map((stat, idx) => (
           <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-start gap-4">
             <div className={`p-3 rounded-xl ${stat.color}`}>
-              <span className="material-symbols-outlined">{stat.icon}</span>
+              <span className="material-symbols-outlined">{stat.icon === 'shadow' ? 'shield_person' : stat.icon}</span>
             </div>
             <div>
               <p className="text-3xl font-black text-slate-800">{stat.value}</p>
@@ -48,10 +51,16 @@ export default function AdminDashboard() {
         ))}
       </div>
       
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 min-h-[400px] flex items-center justify-center text-slate-400">
-        <div className="text-center">
-          <span className="material-symbols-outlined text-4xl mb-2 opacity-50">construction</span>
-          <p>Area Grafik & Analitik (Segera Hadir)</p>
+      {/* Interactive Analytics Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="flex flex-col min-h-[360px]">
+          <PublicationTrendChart news={news} gallery={gallery} />
+        </div>
+        <div className="flex flex-col min-h-[360px]">
+          <CategoryNewsChart news={news} />
+        </div>
+        <div className="flex flex-col min-h-[360px]">
+          <VisitorAnalyticsChart />
         </div>
       </div>
     </div>

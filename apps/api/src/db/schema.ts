@@ -113,3 +113,10 @@ export const carousel = pgTable('carousel', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow()
 });
+
+export const visits = pgTable('visits', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  device: varchar('device', { length: 20 }).notNull(), // 'desktop', 'mobile', 'tablet'
+  visitorType: varchar('visitor_type', { length: 20 }).notNull(), // 'new', 'returning'
+  createdAt: timestamp('created_at').notNull().defaultNow()
+});
