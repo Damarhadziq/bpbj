@@ -1,6 +1,6 @@
 export default function NewsHero() {
   return (
-    <header className="mb-12">
+    <header className="mb-12 pt-32">
       <div className="flex items-center gap-2 mb-2">
         <div className="w-12 h-1 bg-primary"></div>
         <span className="text-xs font-bold uppercase tracking-widest text-primary">Transparansi Informasi</span>

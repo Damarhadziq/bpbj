@@ -1,6 +1,17 @@
 import bpbjHead from '../assets/bpbj_head.png';
+import { useWelcomeMessage } from '../hooks/useWelcome';
 
 export default function WelcomeSection() {
+  const { data: welcomeData } = useWelcomeMessage();
+
+  // Fallback content if database is empty
+  const defaultMessage = `Assalamu'alaikum Warahmatullahi Wabarakatuh.\n\nPuji syukur kita panjatkan ke hadirat Allah SWT yang telah memberikan rahmat dan hidayah-Nya sehingga portal resmi Badan Pengadaan Barang dan Jasa (BPBJ) Kota Semarang dapat hadir untuk melayani masyarakat dengan lebih baik.\n\nPortal ini merupakan wujud komitmen kami dalam mewujudkan transparansi, akuntabilitas, dan efisiensi dalam setiap proses pengadaan barang dan jasa di lingkungan Pemerintah Kota Semarang. Melalui platform ini, kami berharap dapat memberikan akses informasi yang mudah, cepat, dan terpercaya kepada seluruh pemangku kepentingan.\n\nKami mengajak seluruh pihak untuk bersama-sama mendukung tata kelola pengadaan yang bersih, profesional, dan berintegritas demi kemajuan Kota Semarang yang kita cintai.\n\nWassalamu'alaikum Warahmatullahi Wabarakatuh.`;
+
+  const name = welcomeData?.name || "Drs. H. Ahmad Syafrudin, M.Si.";
+  const position = welcomeData?.position || "Kepala BPBJ Kota Semarang";
+  const message = welcomeData?.message || defaultMessage;
+  const imageUrl = welcomeData?.imageUrl || bpbjHead;
+
   return (
     <section id="welcome-section" className="relative py-20 md:py-28 bg-surface overflow-hidden">
       {/* Decorative background elements */}
@@ -12,7 +23,7 @@ export default function WelcomeSection() {
         <div className="flex items-center gap-4 mb-14">
           <div className="w-12 h-1 bg-primary" />
           <span className="text-xs font-black uppercase tracking-[0.2em] text-primary">
-            Sambutan Kepala BPBJ
+            Sambutan Kepala
           </span>
         </div>
 
@@ -27,8 +38,8 @@ export default function WelcomeSection() {
               {/* Photo container */}
               <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-primary/10">
                 <img
-                  src={bpbjHead}
-                  alt="Kepala BPBJ Kota Semarang"
+                  src={imageUrl}
+                  alt={position}
                   className="w-full aspect-[3/4] object-cover object-top"
                 />
                 {/* Gradient overlay at bottom */}
@@ -46,10 +57,10 @@ export default function WelcomeSection() {
                   <div className="w-10 h-0.5 bg-primary/30 rounded-full" />
                 </div>
                 <h3 className="text-lg font-bold text-on-surface tracking-tight leading-snug">
-                  Drs. H. Ahmad Syafrudin, M.Si.
+                  {name}
                 </h3>
                 <p className="text-sm text-on-surface-variant mt-1 font-medium">
-                  Kepala BPBJ Kota Semarang
+                  {position}
                 </p>
               </div>
             </div>
@@ -68,29 +79,15 @@ export default function WelcomeSection() {
                 <span className="text-primary">BPBJ Kota Semarang</span>
               </h2>
 
-              <div className="space-y-5 text-on-surface-variant text-base md:text-lg leading-relaxed">
-                <p>
-                  Assalamu'alaikum Warahmatullahi Wabarakatuh.
-                </p>
-                <p>
-                  Puji syukur kita panjatkan ke hadirat Allah SWT yang telah memberikan rahmat dan hidayah-Nya sehingga portal resmi Badan Pengadaan Barang dan Jasa (BPBJ) Kota Semarang dapat hadir untuk melayani masyarakat dengan lebih baik.
-                </p>
-                <p>
-                  Portal ini merupakan wujud komitmen kami dalam mewujudkan transparansi, akuntabilitas, dan efisiensi dalam setiap proses pengadaan barang dan jasa di lingkungan Pemerintah Kota Semarang. Melalui platform ini, kami berharap dapat memberikan akses informasi yang mudah, cepat, dan terpercaya kepada seluruh pemangku kepentingan.
-                </p>
-                <p>
-                  Kami mengajak seluruh pihak untuk bersama-sama mendukung tata kelola pengadaan yang bersih, profesional, dan berintegritas demi kemajuan Kota Semarang yang kita cintai.
-                </p>
-                <p className="font-medium text-on-surface">
-                  Wassalamu'alaikum Warahmatullahi Wabarakatuh.
-                </p>
+              <div className="space-y-5 text-on-surface-variant text-base md:text-lg leading-relaxed whitespace-pre-line">
+                {message}
               </div>
 
               {/* Signature line */}
               <div className="mt-8 pt-6 border-t border-outline-variant/40 flex items-center gap-4">
                 <div className="w-12 h-0.5 bg-primary rounded-full" />
                 <span className="text-sm font-semibold text-primary tracking-wide uppercase">
-                  Kepala BPBJ Kota Semarang
+                  {position}
                 </span>
               </div>
             </div>

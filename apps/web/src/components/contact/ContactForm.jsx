@@ -1,4 +1,33 @@
+import { useState } from 'react';
+import { useCreateContact } from '../../hooks/useContacts';
+
 export default function ContactForm() {
+  const createContact = useCreateContact();
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: 'Pertanyaan Umum',
+    message: '',
+  });
+  const [status, setStatus] = useState(null);
+
+  const handleChange = (field) => (event) => {
+    setFormData((current) => ({ ...current, [field]: event.target.value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setStatus(null);
+    await createContact.mutateAsync(formData);
+    setFormData({
+      name: '',
+      email: '',
+      subject: 'Pertanyaan Umum',
+      message: '',
+    });
+    setStatus('sent');
+  };
+
   return (
     <div className="lg:col-span-8 bg-surface-container-low p-8 md:p-12 shadow-sm">
       <div className="mb-10">
@@ -8,18 +37,36 @@ export default function ContactForm() {
           Kami menghargai setiap masukan Anda. Gunakan formulir di bawah ini untuk mengirimkan pertanyaan atau aspirasi terkait pengadaan barang dan jasa di lingkungan Pemerintah Kota Semarang.
         </p>
       </div>
-      <form action="#" className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={(e) => e.preventDefault()}>
+      <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Nama Lengkap</label>
-          <input className="w-full bg-surface-container-high border-none border-b-2 border-outline-variant focus:border-primary focus:ring-0 px-4 py-3 text-on-surface transition-all outline-none" placeholder="Masukkan nama Anda" type="text"/>
+          <input
+            className="w-full bg-surface-container-high border-none border-b-2 border-outline-variant focus:border-primary focus:ring-0 px-4 py-3 text-on-surface transition-all outline-none"
+            placeholder="Masukkan nama Anda"
+            type="text"
+            value={formData.name}
+            onChange={handleChange('name')}
+            required
+          />
         </div>
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Alamat Email</label>
-          <input className="w-full bg-surface-container-high border-none border-b-2 border-outline-variant focus:border-primary focus:ring-0 px-4 py-3 text-on-surface transition-all outline-none" placeholder="contoh@mail.com" type="email"/>
+          <input
+            className="w-full bg-surface-container-high border-none border-b-2 border-outline-variant focus:border-primary focus:ring-0 px-4 py-3 text-on-surface transition-all outline-none"
+            placeholder="contoh@mail.com"
+            type="email"
+            value={formData.email}
+            onChange={handleChange('email')}
+            required
+          />
         </div>
         <div className="space-y-2 md:col-span-2">
           <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Subjek / Kategori</label>
-          <select className="w-full bg-surface-container-high border-none border-b-2 border-outline-variant focus:border-primary focus:ring-0 px-4 py-3 text-on-surface transition-all outline-none">
+          <select
+            className="w-full bg-surface-container-high border-none border-b-2 border-outline-variant focus:border-primary focus:ring-0 px-4 py-3 text-on-surface transition-all outline-none"
+            value={formData.subject}
+            onChange={handleChange('subject')}
+          >
             <option>Pertanyaan Umum</option>
             <option>Aspirasi Pembangunan</option>
             <option>Laporan Pengaduan</option>
@@ -28,15 +75,33 @@ export default function ContactForm() {
         </div>
         <div className="space-y-2 md:col-span-2">
           <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Pesan Anda</label>
-          <textarea className="w-full bg-surface-container-high border-none border-b-2 border-outline-variant focus:border-primary focus:ring-0 px-4 py-3 text-on-surface transition-all resize-none outline-none" placeholder="Tuliskan pesan Anda di sini..." rows={6}></textarea>
+          <textarea
+            className="w-full bg-surface-container-high border-none border-b-2 border-outline-variant focus:border-primary focus:ring-0 px-4 py-3 text-on-surface transition-all resize-none outline-none"
+            placeholder="Tuliskan pesan Anda di sini..."
+            rows={6}
+            value={formData.message}
+            onChange={handleChange('message')}
+            required
+          />
         </div>
+        {(status || createContact.isError) && (
+          <div className="md:col-span-2">
+            <p className={`text-sm font-semibold ${createContact.isError ? 'text-red-600' : 'text-green-600'}`}>
+              {createContact.isError ? 'Pesan gagal dikirim. Silakan coba lagi.' : 'Pesan berhasil dikirim.'}
+            </p>
+          </div>
+        )}
         <div className="md:col-span-2 flex flex-col md:flex-row items-start md:items-center justify-between pt-4 gap-6">
           <p className="text-[10px] text-on-surface-variant uppercase tracking-tighter max-w-xs font-medium">
             Dengan menekan tombol kirim, Anda menyetujui kebijakan privasi kami mengenai pengolahan data pribadi.
           </p>
-          <button className="bg-primary hover:bg-primary-container text-white px-10 py-4 font-black uppercase tracking-widest text-sm transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3 w-full md:w-auto" type="submit">
-            Kirim Sekarang
-            <span className="material-symbols-outlined text-sm">send</span>
+          <button
+            className="bg-primary hover:bg-primary-container text-white px-10 py-4 font-black uppercase tracking-widest text-sm transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3 w-full md:w-auto disabled:opacity-60 disabled:cursor-not-allowed"
+            type="submit"
+            disabled={createContact.isPending}
+          >
+            {createContact.isPending ? 'Mengirim...' : 'Kirim Sekarang'}
+            <span className="material-symbols-outlined text-sm">{createContact.isPending ? 'progress_activity' : 'send'}</span>
           </button>
         </div>
       </form>

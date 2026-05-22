@@ -7,7 +7,7 @@ export default function ContactInfo() {
           <span className="material-symbols-outlined text-primary mt-1">location_on</span>
           <div>
             <p className="text-xs text-on-surface-variant font-bold uppercase tracking-wider mb-1">Alamat Kantor</p>
-            <p className="text-on-surface leading-relaxed">Jl. Pemuda No. 148, Gedung Balaikota, Sekayu, Semarang Tengah, Kota Semarang</p>
+            <p className="text-on-surface leading-relaxed">Jl. Pemuda No. 148, Gedung Moch Ichsan Lantai 6, Sekayu, Semarang Tengah, Kota Semarang</p>
           </div>
         </div>
         <div className="flex items-start gap-4">
@@ -21,7 +21,7 @@ export default function ContactInfo() {
           <span className="material-symbols-outlined text-primary mt-1">call</span>
           <div>
             <p className="text-xs text-on-surface-variant font-bold uppercase tracking-wider mb-1">Telepon &amp; Fax</p>
-            <p className="text-on-surface">(024) 3513366 ext. 1234</p>
+            <p className="text-on-surface">(024) 3584000</p>
           </div>
         </div>
         <div className="flex items-start gap-4">

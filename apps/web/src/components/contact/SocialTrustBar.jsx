@@ -4,20 +4,31 @@ export default function SocialTrustBar() {
       <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8 opacity-60">
         <span className="text-xs font-bold uppercase tracking-[0.3em] text-on-surface-variant text-center md:text-left">Kanal Media Sosial Kami</span>
         <div className="flex flex-wrap justify-center gap-8 md:gap-12">
-          <a className="flex items-center gap-2 grayscale hover:grayscale-0 transition-all" href="#">
-            <img alt="Facebook" className="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlSsOOLKV33zkYCn7_pf1S3jGBmS4LmRw7ZdlUBRk04F0AvN-NWuFpfsz7qkZZl_ugMRH_BMaTqJ-oyrltp0xDM3arBerO9cF9qXQdPX10xp2sI2qJQLSFu4odJS0qdGit8ooqhAyt-xTRKiRtuCvm8RuCmUFM3WzZVWvDMkMfFYH7HvmtbRdiG_aMamIe4Ve5EfV3AWLsDRQKSuT5Ej3SLC17fb8yjYCc31HUzTO9IWbsAzdXNWTySbGedT9BkXEhaeQ5swyHzQ"/>
+          <a className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-all" href="https://www.facebook.com/share/1B911jpwR9/" target="_blank" rel="noopener noreferrer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+            </svg>
             <span className="text-xs font-bold">Facebook</span>
           </a>
-          <a className="flex items-center gap-2 grayscale hover:grayscale-0 transition-all" href="#">
-            <img alt="Instagram" className="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyE9fRHfCkWwqKV58I9TaQBoBvCWODWD3vgqNrFldGkV9FJI_muoEsRBaDY8QqvlPi58uYcLHYmNVYR2VYXl1bBrg_lQIbJxxAGxXb4rKiw9Sw-8kLuqf1ybd0ME6XlwYunkpRQiJqeF3VdPz3kQeUCMZl1ZQs87eVyqen2hqjij926SNKapCOjKalPzY2Pegl1Dm77UA-5v2R0DI9W26Q-c59bf9xEYxPbHnGsZ5UWFRtSwvcCAaLS6MZ1oOj0dsw36BT27a9VQ"/>
+          <a className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-all" href="https://www.instagram.com/bag.pengadaanbarangjasa.smg?igsh=cGQ1amFpMTdnMzU5" target="_blank" rel="noopener noreferrer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+            </svg>
             <span className="text-xs font-bold">Instagram</span>
           </a>
-          <a className="flex items-center gap-2 grayscale hover:grayscale-0 transition-all" href="#">
-            <img alt="Twitter" className="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAik0CSoGd7F5ZxTh6jIw944tnPpSlb2Bu0s_GFzbXi9RN73YiuzCD_DuYmXL9PizS2gUTUQJk5DbKd-4nhphY2liYmfUo5yD1La4tY5mnx7wSVJD9Im8Q4oF1KmG4UTwRWeDK3wX6OcqIJ01P76EQqtUADtpaQu2mOu38r3m_jV7UslY2SyEqxuCtywdSDyyIz771tvtEXRbqxwpDK4L0-pndw7uHhIq4l3THnuF8Gl2on5xaAatib2Vqddt3DTHhEriE9sAV8Cg"/>
+          <a className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-all" href="https://x.com/BpbjSemarang" target="_blank" rel="noopener noreferrer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+            </svg>
             <span className="text-xs font-bold">Twitter/X</span>
           </a>
-          <a className="flex items-center gap-2 grayscale hover:grayscale-0 transition-all" href="#">
-            <img alt="Youtube" className="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5_Cgj1FNPbANh5ATO-gt9y8F8XwFSUVgSDbm_SVHmwmP2r1TQz0702byaX_GpmaKDN3-1twyq008x68-54b26vIWDZHe-3SN_xCL3XcaJlVOXkWbb-pwSnOAQQeXHv3C21DwFOPMS2e_dBQDw_cpdFdxWsQJTqEnGRhSyvnb54n3RUG_nfYOp_RP0R2Xa0pGXSMeDFFugsUDvU3NJI4wDbRi_hMM9FSNLHYEtsWUD-8Cs-8TwXGvAJgK8xlIlX9HQ5ycQrIQWdg"/>
+          <a className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-all" href="https://www.youtube.com/@bpbjkotasmg" target="_blank" rel="noopener noreferrer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33 2.78 2.78 0 0 0 1.94 2C5.12 19.5 12 19.5 12 19.5s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z"></path>
+              <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
+            </svg>
             <span className="text-xs font-bold">YouTube</span>
           </a>
         </div>

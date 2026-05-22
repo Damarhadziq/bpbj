@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
@@ -7,19 +8,102 @@ import GalleryPage from './pages/GalleryPage';
 import ContactPage from './pages/ContactPage';
 import NewsPage from './pages/NewsPage';
 
+import NewsDetailPage from './pages/NewsDetailPage';
+
+import GalleryDetailPage from './pages/GalleryDetailPage';
+
+import ScrollToTop from './components/ScrollToTop';
+import AdminLogin from './pages/admin/AdminLogin';
+import AdminLayout from './components/admin/AdminLayout';
+import ProtectedRoute from './components/admin/ProtectedRoute';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminNews from './pages/admin/AdminNews';
+import AdminGallery from './pages/admin/AdminGallery';
+import AdminWelcome from './pages/admin/AdminWelcome';
+import AdminContacts from './pages/admin/AdminContacts';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminCarousel from './pages/admin/AdminCarousel';
+
 function App() {
   return (
-    <BrowserRouter>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/gallery" element={<GalleryPage />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/news" element={<NewsPage />} />
-      </Routes>
-      <Footer />
-    </BrowserRouter>
+    <HelmetProvider>
+      <BrowserRouter>
+        <ScrollToTop />
+        <Routes>
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          
+          <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin', 'superadmin']} />}>
+            <Route element={<AdminLayout />}>
+              <Route index element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="carousel" element={<AdminCarousel />} />
+              <Route path="news" element={<AdminNews />} />
+              <Route path="gallery" element={<AdminGallery />} />
+              <Route path="welcome" element={<AdminWelcome />} />
+              <Route path="contacts" element={<AdminContacts />} />
+            </Route>
+          </Route>
+          
+          <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['superadmin']} />}>
+            <Route element={<AdminLayout />}>
+              <Route index element={<AdminUsers />} />
+            </Route>
+          </Route>
+
+          {/* Public Routes */}
+          <Route path="/" element={
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <HomePage />
+              <Footer />
+            </div>
+          } />
+          <Route path="/profile" element={
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <ProfilePage />
+              <Footer />
+            </div>
+          } />
+          <Route path="/gallery" element={
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <GalleryPage />
+              <Footer />
+            </div>
+          } />
+          <Route path="/gallery/:id" element={
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <GalleryDetailPage />
+              <Footer />
+            </div>
+          } />
+          <Route path="/contact" element={
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <ContactPage />
+              <Footer />
+            </div>
+          } />
+          <Route path="/news" element={
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <NewsPage />
+              <Footer />
+            </div>
+          } />
+          <Route path="/news/:id" element={
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <NewsDetailPage />
+              <Footer />
+            </div>
+          } />
+        </Routes>
+      </BrowserRouter>
+    </HelmetProvider>
   );
 }
 

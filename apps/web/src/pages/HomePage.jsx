@@ -7,7 +7,7 @@ import HelpdeskSection from '../components/HelpdeskSection';
 
 export default function HomePage() {
   return (
-    <main>
+    <main className="flex-grow w-full">
       <HeroSection />
       <WelcomeSection />
       <PrinciplesSection />

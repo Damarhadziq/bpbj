@@ -6,7 +6,7 @@ import SocialTrustBar from '../components/contact/SocialTrustBar';
 
 export default function ContactPage() {
   return (
-    <main className="pt-24 flex-grow">
+    <main className="flex-grow pb-16 w-full">
       <ContactHero />
       <section className="max-w-7xl mx-auto px-6 -mt-16 relative z-10 pb-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
