@@ -3,6 +3,7 @@ import { db } from '../config/db';
 import { headWelcome } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { verifyAuth, requireRole } from '../middlewares/auth';
+import { validateWelcomePayload } from '../utils/validation';
 
 const router = Router();
 
@@ -23,7 +24,8 @@ router.get('/', async (req, res) => {
 // Update the welcome message
 router.put('/', verifyAuth, requireRole(['admin', 'superadmin']), async (req, res) => {
   try {
-    const { name, position, message, imageUrl } = req.body;
+    const payload = validateWelcomePayload(req.body);
+    if (!payload.ok) return res.status(400).json({ error: payload.error });
     
     // Check if it exists
     const existing = await db.select().from(headWelcome).where(eq(headWelcome.id, 1)).limit(1);
@@ -32,19 +34,19 @@ router.put('/', verifyAuth, requireRole(['admin', 'superadmin']), async (req, re
     if (existing.length === 0) {
       updated = await db.insert(headWelcome).values({
         id: 1,
-        name,
-        position,
-        message,
-        imageUrl,
+        name: payload.data.name,
+        position: payload.data.position,
+        message: payload.data.message,
+        imageUrl: payload.data.imageUrl,
         createdAt: new Date(),
         updatedAt: new Date()
       }).returning();
     } else {
       updated = await db.update(headWelcome).set({
-        name,
-        position,
-        message,
-        imageUrl,
+        name: payload.data.name,
+        position: payload.data.position,
+        message: payload.data.message,
+        imageUrl: payload.data.imageUrl,
         updatedAt: new Date()
       }).where(eq(headWelcome.id, 1)).returning();
     }

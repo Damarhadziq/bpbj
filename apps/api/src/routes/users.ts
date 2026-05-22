@@ -6,6 +6,14 @@ import { verifyAuth, requireRole } from '../middlewares/auth';
 import { auth } from '../auth/auth';
 import { fromNodeHeaders } from 'better-auth/node';
 import { hashPassword, verifyPassword } from '@better-auth/utils/password';
+import {
+  validateAdminPasswordPayload,
+  validateConfirmationText,
+  validateOwnPasswordPayload,
+  validateRole,
+  validateTextId,
+  validateUserCreatePayload,
+} from '../utils/validation';
 
 const router = Router();
 
@@ -34,26 +42,19 @@ router.get('/', async (req, res) => {
 // POST create new admin user
 router.post('/', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const payload = validateUserCreatePayload(req.body);
+    if (!payload.ok) return res.status(400).json({ error: payload.error });
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Name, email, and password are required' });
-    }
-
-    if (password.length < 8) {
-      return res.status(400).json({ error: 'Password must be at least 8 characters' });
-    }
-
-    const existingUser = await db.select().from(user).where(eq(user.email, email.toLowerCase())).limit(1);
+    const existingUser = await db.select().from(user).where(eq(user.email, payload.data.email)).limit(1);
     if (existingUser.length > 0) {
       return res.status(409).json({ error: 'Email already exists' });
     }
 
     const result = await auth.api.signUpEmail({
       body: {
-        name,
-        email,
-        password,
+        name: payload.data.name,
+        email: payload.data.email,
+        password: payload.data.password,
         rememberMe: false,
       },
       headers: fromNodeHeaders(req.headers),
@@ -83,16 +84,14 @@ router.post('/', async (req, res) => {
 // PUT update role
 router.put('/:id/role', async (req, res) => {
   try {
-    const { id } = req.params;
-    const { role } = req.body;
-    
-    if (!['admin', 'superadmin'].includes(role)) {
-      return res.status(400).json({ error: 'Invalid role' });
-    }
+    const id = validateTextId(req.params.id);
+    if (!id.ok) return res.status(400).json({ error: id.error });
+    const role = validateRole(req.body);
+    if (!role.ok) return res.status(400).json({ error: role.error });
     
     const updated = await db.update(user)
-      .set({ role, updatedAt: new Date() })
-      .where(eq(user.id, id))
+      .set({ role: role.data, updatedAt: new Date() })
+      .where(eq(user.id, id.data))
       .returning({ id: user.id, name: user.name, role: user.role });
       
     if (updated.length === 0) return res.status(404).json({ error: 'User not found' });
@@ -108,23 +107,8 @@ router.put('/:id/role', async (req, res) => {
 router.put('/me/password', async (req, res) => {
   try {
     const currentUser = (req as any).user;
-    const { currentPassword, password, confirmPassword } = req.body;
-
-    if (!currentPassword || !password || !confirmPassword) {
-      return res.status(400).json({ error: 'Current password, new password, and confirmation are required' });
-    }
-
-    if (password !== confirmPassword) {
-      return res.status(400).json({ error: 'Password confirmation does not match' });
-    }
-
-    if (password.length < 8) {
-      return res.status(400).json({ error: 'Password must be at least 8 characters' });
-    }
-
-    if (currentPassword === password) {
-      return res.status(400).json({ error: 'New password must be different from current password' });
-    }
+    const payload = validateOwnPasswordPayload(req.body);
+    if (!payload.ok) return res.status(400).json({ error: payload.error });
 
     const credentialAccount = await db.select()
       .from(account)
@@ -135,12 +119,12 @@ router.put('/me/password', async (req, res) => {
       return res.status(404).json({ error: 'Credential account not found' });
     }
 
-    const isCurrentPasswordValid = await verifyPassword(credentialAccount[0].password, currentPassword);
+    const isCurrentPasswordValid = await verifyPassword(credentialAccount[0].password, payload.data.currentPassword);
     if (!isCurrentPasswordValid) {
       return res.status(400).json({ error: 'Current password is incorrect' });
     }
 
-    const hashedPassword = await hashPassword(password);
+    const hashedPassword = await hashPassword(payload.data.password);
     await db.update(account)
       .set({ password: hashedPassword, updatedAt: new Date() })
       .where(and(eq(account.userId, currentUser.id), eq(account.providerId, 'credential')));
@@ -158,48 +142,38 @@ router.put('/me/password', async (req, res) => {
 // PUT change user password
 router.put('/:id/password', async (req, res) => {
   try {
-    const { id } = req.params;
-    const { password, confirmPassword, confirmationText } = req.body;
+    const id = validateTextId(req.params.id);
+    if (!id.ok) return res.status(400).json({ error: id.error });
+    const payload = validateAdminPasswordPayload(req.body);
+    if (!payload.ok) return res.status(400).json({ error: payload.error });
     const currentUser = (req as any).user;
 
-    if (currentUser.id === id) {
+    if (currentUser.id === id.data) {
       return res.status(400).json({ error: 'Cannot change your own password from this page' });
     }
 
-    if (!password || !confirmPassword) {
-      return res.status(400).json({ error: 'Password and confirmation are required' });
-    }
-
-    if (password !== confirmPassword) {
-      return res.status(400).json({ error: 'Password confirmation does not match' });
-    }
-
-    if (password.length < 8) {
-      return res.status(400).json({ error: 'Password must be at least 8 characters' });
-    }
-
-    const target = await db.select().from(user).where(eq(user.id, id)).limit(1);
+    const target = await db.select().from(user).where(eq(user.id, id.data)).limit(1);
     if (target.length === 0) return res.status(404).json({ error: 'User not found' });
     if (target[0].role !== 'admin') {
       return res.status(403).json({ error: 'Only admin account passwords can be changed here' });
     }
 
-    if (confirmationText !== target[0].email) {
+    if (payload.data.confirmationText !== target[0].email) {
       return res.status(400).json({ error: 'Type the target email to confirm password change' });
     }
 
-    const hashedPassword = await hashPassword(password);
+    const hashedPassword = await hashPassword(payload.data.password);
     const updated = await db.update(account)
       .set({ password: hashedPassword, updatedAt: new Date() })
-      .where(and(eq(account.userId, id), eq(account.providerId, 'credential')))
+      .where(and(eq(account.userId, id.data), eq(account.providerId, 'credential')))
       .returning({ id: account.id });
 
     if (updated.length === 0) {
       return res.status(404).json({ error: 'Credential account not found' });
     }
 
-    await db.delete(session).where(eq(session.userId, id));
-    await db.update(user).set({ updatedAt: new Date() }).where(eq(user.id, id));
+    await db.delete(session).where(eq(session.userId, id.data));
+    await db.update(user).set({ updatedAt: new Date() }).where(eq(user.id, id.data));
 
     return res.json({ success: true });
   } catch (error) {
@@ -211,29 +185,31 @@ router.put('/:id/password', async (req, res) => {
 // DELETE user
 router.delete('/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const { confirmationText } = req.body || {};
+    const id = validateTextId(req.params.id);
+    if (!id.ok) return res.status(400).json({ error: id.error });
+    const confirmationText = validateConfirmationText(req.body);
+    if (!confirmationText.ok) return res.status(400).json({ error: confirmationText.error });
     
     // Check if trying to delete oneself
     const currentUser = (req as any).user;
-    if (currentUser.id === id) {
+    if (currentUser.id === id.data) {
       return res.status(400).json({ error: 'Cannot delete your own account' });
     }
 
-    const target = await db.select().from(user).where(eq(user.id, id)).limit(1);
+    const target = await db.select().from(user).where(eq(user.id, id.data)).limit(1);
     if (target.length === 0) return res.status(404).json({ error: 'User not found' });
     if (target[0].role !== 'admin') {
       return res.status(403).json({ error: 'Only admin accounts can be deleted here' });
     }
 
-    if (confirmationText !== target[0].email) {
+    if (confirmationText.data !== target[0].email) {
       return res.status(400).json({ error: 'Type the target email to confirm deletion' });
     }
 
-    await db.delete(session).where(eq(session.userId, id));
-    await db.delete(account).where(eq(account.userId, id));
-    await db.update(news).set({ authorId: currentUser.id, updatedAt: new Date() }).where(eq(news.authorId, id));
-    const deleted = await db.delete(user).where(eq(user.id, id)).returning({ id: user.id });
+    await db.delete(session).where(eq(session.userId, id.data));
+    await db.delete(account).where(eq(account.userId, id.data));
+    await db.update(news).set({ authorId: currentUser.id, updatedAt: new Date() }).where(eq(news.authorId, id.data));
+    const deleted = await db.delete(user).where(eq(user.id, id.data)).returning({ id: user.id });
     
     return res.json({ success: true });
   } catch (error) {

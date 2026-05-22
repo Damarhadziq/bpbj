@@ -24,6 +24,7 @@ import AdminWelcome from './pages/admin/AdminWelcome';
 import AdminContacts from './pages/admin/AdminContacts';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminCarousel from './pages/admin/AdminCarousel';
+import AdminServiceLinks from './pages/admin/AdminServiceLinks';
 import { trackVisit } from './utils/visitorTracker';
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
               <Route path="carousel" element={<AdminCarousel />} />
               <Route path="news" element={<AdminNews />} />
               <Route path="gallery" element={<AdminGallery />} />
+              <Route path="service-links" element={<AdminServiceLinks />} />
               <Route path="welcome" element={<AdminWelcome />} />
               <Route path="contacts" element={<AdminContacts />} />
             </Route>

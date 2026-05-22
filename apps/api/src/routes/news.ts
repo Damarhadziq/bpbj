@@ -3,6 +3,7 @@ import { db } from '../config/db';
 import { news } from '../db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { verifyAuth, requireRole } from '../middlewares/auth';
+import { validateNewsPayload, validateUuid } from '../utils/validation';
 
 const router = Router();
 
@@ -23,11 +24,6 @@ const generateSummary = (content = '', maxLength = 180) => {
   return `${excerpt.slice(0, cutPoint).trim()}...`;
 };
 
-const requireFields = (fields: Record<string, unknown>) => {
-  const missingField = Object.entries(fields).find(([, value]) => !String(value || '').trim());
-  return missingField?.[0];
-};
-
 // GET all news (Public)
 router.get('/', async (req, res) => {
   try {
@@ -42,8 +38,10 @@ router.get('/', async (req, res) => {
 // GET single news (Public)
 router.get('/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const item = await db.select().from(news).where(eq(news.id, id as any));
+    const id = validateUuid(req.params.id);
+    if (!id.ok) return res.status(400).json({ error: id.error });
+
+    const item = await db.select().from(news).where(eq(news.id, id.data));
     if (item.length === 0) return res.status(404).json({ error: 'Not found' });
     return res.json(item[0]);
   } catch (error) {
@@ -56,22 +54,18 @@ router.get('/:id', async (req, res) => {
 router.post('/', verifyAuth, requireRole(['admin', 'superadmin']), async (req, res) => {
   try {
     const user = (req as any).user;
-    const { title, slug, category, content, imageUrl, isFeatured, date } = req.body;
-    const missingField = requireFields({ title, category, content, imageUrl, date });
-
-    if (missingField) {
-      return res.status(400).json({ error: `${missingField} is required` });
-    }
+    const payload = validateNewsPayload(req.body);
+    if (!payload.ok) return res.status(400).json({ error: payload.error });
     
     const newArticle = await db.insert(news).values({
-      title,
-      slug,
-      category,
-      summary: generateSummary(content),
-      content,
-      imageUrl,
-      isFeatured: isFeatured || false,
-      date: date ? new Date(date) : new Date(),
+      title: payload.data.title,
+      slug: payload.data.slug,
+      category: payload.data.category,
+      summary: generateSummary(payload.data.content),
+      content: payload.data.content,
+      imageUrl: payload.data.imageUrl,
+      isFeatured: payload.data.isFeatured,
+      date: payload.data.date,
       authorId: user.id
     }).returning();
     
@@ -85,25 +79,22 @@ router.post('/', verifyAuth, requireRole(['admin', 'superadmin']), async (req, r
 // PUT update article (Admin/Superadmin)
 router.put('/:id', verifyAuth, requireRole(['admin', 'superadmin']), async (req, res) => {
   try {
-    const { id } = req.params;
-    const { title, slug, category, content, imageUrl, isFeatured, date } = req.body;
-    const missingField = requireFields({ title, category, content, imageUrl, date });
-
-    if (missingField) {
-      return res.status(400).json({ error: `${missingField} is required` });
-    }
+    const id = validateUuid(req.params.id);
+    if (!id.ok) return res.status(400).json({ error: id.error });
+    const payload = validateNewsPayload(req.body);
+    if (!payload.ok) return res.status(400).json({ error: payload.error });
     
     const updated = await db.update(news).set({
-      title,
-      slug,
-      category,
-      summary: generateSummary(content),
-      content,
-      imageUrl,
-      isFeatured,
-      date: date ? new Date(date) : undefined,
+      title: payload.data.title,
+      slug: payload.data.slug,
+      category: payload.data.category,
+      summary: generateSummary(payload.data.content),
+      content: payload.data.content,
+      imageUrl: payload.data.imageUrl,
+      isFeatured: payload.data.isFeatured,
+      date: payload.data.date,
       updatedAt: new Date()
-    }).where(eq(news.id, id as any)).returning();
+    }).where(eq(news.id, id.data)).returning();
     
     if (updated.length === 0) return res.status(404).json({ error: 'Not found' });
     return res.json(updated[0]);
@@ -116,8 +107,10 @@ router.put('/:id', verifyAuth, requireRole(['admin', 'superadmin']), async (req,
 // DELETE article (Admin/Superadmin)
 router.delete('/:id', verifyAuth, requireRole(['admin', 'superadmin']), async (req, res) => {
   try {
-    const { id } = req.params;
-    const deleted = await db.delete(news).where(eq(news.id, id as any)).returning();
+    const id = validateUuid(req.params.id);
+    if (!id.ok) return res.status(400).json({ error: id.error });
+
+    const deleted = await db.delete(news).where(eq(news.id, id.data)).returning();
     
     if (deleted.length === 0) return res.status(404).json({ error: 'Not found' });
     return res.json({ success: true });

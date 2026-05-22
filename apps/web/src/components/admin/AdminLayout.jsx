@@ -18,6 +18,7 @@ export default function AdminLayout() {
     { name: 'Carousel', path: '/admin/carousel', icon: 'view_carousel', roles: ['admin', 'superadmin'] },
     { name: 'Berita', path: '/admin/news', icon: 'article', roles: ['admin', 'superadmin'] },
     { name: 'Galeri', path: '/admin/gallery', icon: 'photo_library', roles: ['admin', 'superadmin'] },
+    { name: 'Layanan Lainnya', path: '/admin/service-links', icon: 'widgets', roles: ['admin', 'superadmin'] },
     { name: 'Pengaduan', path: '/admin/contacts', icon: 'forum', roles: ['admin', 'superadmin'] },
     { name: 'Sambutan Kepala', path: '/admin/welcome', icon: 'campaign', roles: ['admin', 'superadmin'] },
     { name: 'Manajemen Akun', path: '/admin/users', icon: 'manage_accounts', roles: ['superadmin'] },

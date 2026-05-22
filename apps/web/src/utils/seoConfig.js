@@ -51,7 +51,7 @@ export const organizationSchema = {
   name: 'Bagian Pengadaan Barang dan Jasa Sekretariat Daerah Kota Semarang',
   alternateName: 'BPBJ Kota Semarang',
   url: BASE_URL,
-  logo: `${BASE_URL}/favicon.svg`,
+  logo: `${BASE_URL}/favicon.png`,
   description: SITE_DESCRIPTION,
   address: {
     '@type': 'PostalAddress',
@@ -117,7 +117,7 @@ export function generateArticleSchema(article) {
       name: 'BPBJ Kota Semarang',
       logo: {
         '@type': 'ImageObject',
-        url: `${BASE_URL}/favicon.svg`,
+        url: `${BASE_URL}/favicon.png`,
       },
     },
     mainEntityOfPage: {

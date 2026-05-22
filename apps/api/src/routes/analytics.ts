@@ -2,21 +2,19 @@ import { Router } from 'express';
 import { db } from '../config/db';
 import { visits } from '../db/schema';
 import { sql } from 'drizzle-orm';
+import { validateAnalyticsVisit } from '../utils/validation';
 
 const router = Router();
 
 // POST a new visit (Public)
 router.post('/visit', async (req, res) => {
   try {
-    const { device, visitorType } = req.body;
-    
-    if (!device || !visitorType) {
-      return res.status(400).json({ error: 'Device and visitorType are required' });
-    }
+    const payload = validateAnalyticsVisit(req.body);
+    if (!payload.ok) return res.status(400).json({ error: payload.error });
 
     await db.insert(visits).values({
-      device,
-      visitorType,
+      device: payload.data.device,
+      visitorType: payload.data.visitorType,
     });
     
     return res.status(201).json({ success: true });

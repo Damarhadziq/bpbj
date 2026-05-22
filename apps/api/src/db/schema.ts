@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, varchar, uuid, integer, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, boolean, varchar, uuid, integer, pgEnum, jsonb } from 'drizzle-orm/pg-core';
 
 export const roleEnum = pgEnum('role', ['admin', 'superadmin']);
 
@@ -76,6 +76,7 @@ export const gallery = pgTable('gallery', {
   description: text('description').notNull(),
   imageUrl: text('image_url').notNull(),
   imageAlt: varchar('image_alt', { length: 255 }),
+  galleryImages: jsonb('gallery_images').$type<{ imageUrl: string; imageAlt?: string; isCover?: boolean }[]>(),
   isFeatured: boolean('is_featured').default(false).notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow()
@@ -119,4 +120,13 @@ export const visits = pgTable('visits', {
   device: varchar('device', { length: 20 }).notNull(), // 'desktop', 'mobile', 'tablet'
   visitorType: varchar('visitor_type', { length: 20 }).notNull(), // 'new', 'returning'
   createdAt: timestamp('created_at').notNull().defaultNow()
+});
+
+export const serviceLinks = pgTable('service_links', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  imageUrl: text('image_url').notNull(),
+  linkUrl: text('link_url').notNull(),
+  displayOrder: integer('display_order').default(0).notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow()
 });

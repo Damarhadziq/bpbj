@@ -1,25 +1,13 @@
-import { useState, useEffect } from 'react';
-import { getVisitorData } from '../../../utils/visitorTracker';
+import { useState } from 'react';
+import { useVisitorStats } from '../../../hooks/useAnalytics';
 
 export default function VisitorAnalyticsChart() {
-  const [visitorData, setVisitorData] = useState({
+  const { data: visitorData = {
     total: 1248,
     devices: { desktop: 812, mobile: 345, tablet: 91 },
     types: { new: 980, returning: 268 }
-  });
+  }, isFetching, refetch } = useVisitorStats();
   const [hoveredIdx, setHoveredIdx] = useState(null); // null means showing total
-
-  // Fetch real-time unique session metrics on load
-  useEffect(() => {
-    setVisitorData(getVisitorData());
-
-    // Listen to storage events so if another tab opens/updates visits, it immediately syncs
-    const handleStorageChange = () => {
-      setVisitorData(getVisitorData());
-    };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
 
   const { total, devices } = visitorData;
   const { desktop, mobile, tablet } = devices;
@@ -75,51 +63,6 @@ export default function VisitorAnalyticsChart() {
     };
   };
 
-  const handleSimulateVisit = () => {
-    // 1. Choose a random device: mobile (45%), desktop (45%), tablet (10%)
-    const rand = Math.random();
-    let selectedDevice = 'desktop';
-    if (rand < 0.45) {
-      selectedDevice = 'mobile';
-    } else if (rand < 0.90) {
-      selectedDevice = 'desktop';
-    } else {
-      selectedDevice = 'tablet';
-    }
-
-    // 2. Increment total count in localStorage
-    const currentTotal = parseInt(localStorage.getItem('bpbj_total_visitors') || '1248', 10);
-    const newTotal = currentTotal + 1;
-    localStorage.setItem('bpbj_total_visitors', newTotal.toString());
-
-    // 3. Increment device count in localStorage
-    const currentDevices = JSON.parse(
-      localStorage.getItem('bpbj_visitor_devices') || 
-      JSON.stringify({ desktop: 812, mobile: 345, tablet: 91 })
-    );
-    currentDevices[selectedDevice] += 1;
-    localStorage.setItem('bpbj_visitor_devices', JSON.stringify(currentDevices));
-
-    // 4. Increment visitor type (new vs returning)
-    const currentTypes = JSON.parse(
-      localStorage.getItem('bpbj_visitor_types') || 
-      JSON.stringify({ new: 980, returning: 268 })
-    );
-    if (Math.random() > 0.3) {
-      currentTypes.new += 1;
-    } else {
-      currentTypes.returning += 1;
-    }
-    localStorage.setItem('bpbj_visitor_types', JSON.stringify(currentTypes));
-
-    // 5. Update local state to trigger live redrawing
-    setVisitorData({
-      total: newTotal,
-      devices: currentDevices,
-      types: currentTypes
-    });
-  };
-
   const centerDisplay = getCenterDisplay();
 
   return (
@@ -130,13 +73,12 @@ export default function VisitorAnalyticsChart() {
           <p className="text-xs text-slate-400 font-medium">Analisis perangkat akses pengunjung unik berbasis sesi</p>
         </div>
         
-        {/* Interactive Simulation Trigger */}
         <button
-          onClick={handleSimulateVisit}
-          title="Simulasikan Pengunjung Baru"
+          onClick={() => refetch()}
+          title="Muat ulang data pengunjung"
           className="flex items-center justify-center p-1.5 rounded-xl border border-slate-100 text-slate-400 hover:text-rose-700 hover:border-rose-100 hover:bg-rose-50/50 transition-all duration-200 shadow-sm"
         >
-          <span className="material-symbols-outlined text-[18px]">bolt</span>
+          <span className={`material-symbols-outlined text-[18px] ${isFetching ? 'animate-spin' : ''}`}>sync</span>
         </button>
       </div>
 
