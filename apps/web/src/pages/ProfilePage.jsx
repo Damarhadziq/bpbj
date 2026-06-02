@@ -4,10 +4,23 @@ import AboutSection from '../components/profile/AboutSection';
 import VisionMissionSection from '../components/profile/VisionMissionSection';
 import TasksFunctionsSection from '../components/profile/TasksFunctionsSection';
 import OrganizationStructureSection from '../components/profile/OrganizationStructureSection';
+import EmployeesSection from '../components/profile/EmployeesSection';
+import SEOHead from '../components/SEOHead';
+import { generateBreadcrumbSchema, organizationSchema, pageSEO } from '../utils/seoConfig';
 
 export default function ProfilePage() {
   return (
     <main className="flex-grow pb-16 w-full">
+      <SEOHead
+        {...pageSEO.profile}
+        schemas={[
+          organizationSchema,
+          generateBreadcrumbSchema([
+            { name: 'Beranda', url: '/' },
+            { name: 'Profil', url: '/profile' },
+          ]),
+        ]}
+      />
       <ProfileHero />
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12">
         <aside className="lg:col-span-3 space-y-2 hidden lg:block">
@@ -18,6 +31,7 @@ export default function ProfilePage() {
           <VisionMissionSection />
           <TasksFunctionsSection />
           <OrganizationStructureSection />
+          <EmployeesSection />
         </div>
       </div>
     </main>

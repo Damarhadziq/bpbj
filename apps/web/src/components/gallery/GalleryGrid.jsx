@@ -19,9 +19,9 @@ export default function GalleryGrid({ items }) {
     <section className="max-w-7xl mx-auto px-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {items.map((item) => (
-          <Link to={`/gallery/${item.id}`} key={item.id} className="group bg-surface-container-lowest overflow-hidden flex flex-col h-full rounded-xl shadow-sm hover:shadow-md transition-shadow">
+          <Link to={`/gallery/${item.id}`} key={item.id} className="group flex h-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white transition-colors hover:border-primary/30">
             <div className="aspect-video overflow-hidden bg-surface-container-low relative">
-              <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src={item.imageUrl || 'https://via.placeholder.com/600x400'} alt={item.imageAlt || item.title} />
+              <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={item.imageUrl || 'https://via.placeholder.com/600x400'} alt={item.imageAlt || item.title} />
               <div className="absolute top-4 left-4">
                 <span className="px-2 py-1 bg-tertiary-container text-white text-[10px] font-bold uppercase tracking-wider rounded">{item.category}</span>
               </div>
@@ -34,7 +34,7 @@ export default function GalleryGrid({ items }) {
                   <span className="material-symbols-outlined text-sm">calendar_today</span>
                   <span>{formatDate(item.date)}</span>
                 </div>
-                <div className="text-primary font-bold text-xs flex items-center gap-1 group-hover:underline">
+                <div className="flex items-center gap-2 text-xs font-bold text-primary transition-all group-hover:gap-3">
                   LIHAT DETAIL <span className="material-symbols-outlined text-sm">arrow_forward</span>
                 </div>
               </div>

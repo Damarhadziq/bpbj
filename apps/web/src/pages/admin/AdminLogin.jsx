@@ -1,7 +1,9 @@
-import { useState } from 'react';
-import { Link, useNavigate, Navigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { signIn, useSession } from '../../lib/authClient';
 import logoSemarang from '../../assets/logo-semarang.png';
+import SEOHead from '../../components/SEOHead';
+import { pageSEO } from '../../utils/seoConfig';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -12,8 +14,19 @@ export default function AdminLogin() {
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState(0);
   const navigate = useNavigate();
+  const location = useLocation();
+  const sessionReason = new URLSearchParams(location.search).get('reason');
+  const isSessionExpired = sessionReason === 'session-expired';
+  const isSessionReplaced = sessionReason === 'session-replaced';
 
   const { data: session, isPending } = useSession();
+  const [isTakingTooLong, setIsTakingTooLong] = useState(false);
+
+  useEffect(() => {
+    if (!isPending) return undefined;
+    const timer = setTimeout(() => setIsTakingTooLong(true), 5000);
+    return () => clearTimeout(timer);
+  }, [isPending]);
 
   if (!isPending && session) {
     return <Navigate to="/admin/dashboard" replace />;
@@ -30,11 +43,18 @@ export default function AdminLogin() {
     setIsLoading(true);
 
     try {
-      const { error: signInError } = await signIn.email({
-        email: email.trim().toLowerCase(),
-        password,
-        rememberMe: false,
-      });
+      const signInResult = await Promise.race([
+        signIn.email({
+          email: email.trim().toLowerCase(),
+          password,
+          rememberMe: false,
+        }),
+        new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('LOGIN_TIMEOUT')), 10000);
+        }),
+      ]);
+
+      const { error: signInError } = signInResult;
 
       if (signInError) {
         const nextFailedAttempts = failedAttempts + 1;
@@ -48,17 +68,32 @@ export default function AdminLogin() {
         setFailedAttempts(0);
         navigate('/admin/dashboard');
       }
-    } catch {
-      setError('Terjadi kesalahan jaringan');
+    } catch (loginError) {
+      setError(loginError.message === 'LOGIN_TIMEOUT'
+        ? 'Server login tidak merespons. Pastikan API lokal berjalan di port 4000 lalu coba lagi.'
+        : 'Terjadi kesalahan jaringan');
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (isPending) return null;
+  if (isPending) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-4 text-center font-['Inter']">
+        <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
+        <p className="mt-4 text-sm font-medium text-slate-700">Menyiapkan halaman login admin...</p>
+        {isTakingTooLong && (
+          <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
+            Proses terlalu lama. Pastikan server API lokal berjalan di port 4000, lalu refresh halaman ini.
+          </p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-surface flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-['Inter']">
+      <SEOHead {...pageSEO.admin} path="/admin/login" noindex />
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <img
           className="mx-auto h-20 w-auto object-contain drop-shadow-sm"
@@ -74,9 +109,9 @@ export default function AdminLogin() {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-xl shadow-primary/5 sm:rounded-2xl sm:px-10 border border-slate-100">
-          <Link to="/" className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors">
-            <span className="material-symbols-outlined text-base">arrow_back</span>
+        <div className="bg-white py-8 px-4 shadow-lg shadow-primary/5 sm:rounded-lg sm:px-10 border border-slate-200">
+          <Link to="/" className="group mb-6 inline-flex items-center gap-2 text-sm font-medium text-primary transition-colors hover:text-primary/80">
+            <span className="material-symbols-outlined text-base transition-transform group-hover:-translate-x-0.5">arrow_back</span>
             Kembali ke Website BPBJ
           </Link>
           <form className="space-y-6" onSubmit={handleSubmit}>
@@ -85,9 +120,19 @@ export default function AdminLogin() {
                 {error}
               </div>
             )}
+            {isSessionExpired && !error && (
+              <div className="rounded-lg border border-amber-100 bg-amber-50 p-3 text-sm font-medium text-amber-700">
+                Sesi admin berakhir karena tidak ada aktivitas. Silakan masuk kembali.
+              </div>
+            )}
+            {isSessionReplaced && !error && (
+              <div className="rounded-lg border border-blue-100 bg-blue-50 p-3 text-sm font-medium text-blue-700">
+                Sesi admin berakhir karena akun ini masuk dari device lain. Silakan masuk kembali jika ingin menggunakan device ini.
+              </div>
+            )}
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">
+              <label className="block text-xs font-medium uppercase tracking-wide text-on-surface-variant mb-2">
                 Alamat Email
               </label>
               <div className="mt-1">
@@ -104,7 +149,7 @@ export default function AdminLogin() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">
+              <label className="block text-xs font-medium uppercase tracking-wide text-on-surface-variant mb-2">
                 Kata Sandi
               </label>
               <div className="mt-1 relative">
@@ -132,7 +177,7 @@ export default function AdminLogin() {
               <button
                 type="submit"
                 disabled={isLoading || lockedUntil > Date.now()}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-primary hover:bg-primary-container focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-container focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {isLoading ? 'Memproses...' : 'Masuk'}
               </button>

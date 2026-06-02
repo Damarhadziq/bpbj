@@ -29,6 +29,16 @@ export const useCreateUser = () => {
   });
 };
 
+export const useUpdateOwnProfile = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: usersApi.updateOwnProfile,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+  });
+};
+
 export const useDeleteUser = () => {
   const queryClient = useQueryClient();
   return useMutation({

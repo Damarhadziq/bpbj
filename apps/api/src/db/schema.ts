@@ -63,6 +63,7 @@ export const news = pgTable('news', {
   content: text('content').notNull(),
   imageUrl: text('image_url'),
   isFeatured: boolean('is_featured').default(false).notNull(),
+  isSelected: boolean('is_selected').default(false).notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow()
 });
@@ -89,6 +90,11 @@ export const contacts = pgTable('contacts', {
   subject: varchar('subject', { length: 255 }),
   message: text('message').notNull(),
   status: varchar('status', { length: 20 }).default('UNREAD').notNull(),
+  replySubject: varchar('reply_subject', { length: 255 }),
+  replyMessage: text('reply_message'),
+  repliedAt: timestamp('replied_at'),
+  repliedBy: text('replied_by').references(() => user.id),
+  emailSentAt: timestamp('email_sent_at'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow()
 });
@@ -127,6 +133,19 @@ export const serviceLinks = pgTable('service_links', {
   imageUrl: text('image_url').notNull(),
   linkUrl: text('link_url').notNull(),
   displayOrder: integer('display_order').default(0).notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow()
+});
+
+export const employees = pgTable('employees', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  position: varchar('position', { length: 255 }).notNull(),
+  quote: text('quote'),
+  imageUrl: text('image_url').notNull(),
+  imageAlt: varchar('image_alt', { length: 255 }),
+  displayOrder: integer('display_order').default(0).notNull(),
+  isActive: boolean('is_active').default(true).notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow()
 });

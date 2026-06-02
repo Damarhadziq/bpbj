@@ -18,7 +18,7 @@ export default function Footer() {
         <div className="space-y-4">
           <h4 className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest text-xs">Kontak</h4>
           <div className="flex flex-col gap-2">
-            <p className="text-slate-500 dark:text-slate-400">Gedung Moch. Ichsan Lt. 4</p>
+            <p className="text-slate-500 dark:text-slate-400">Gedung Moch. Ichsan Lt. 6</p>
             <p className="text-slate-500 dark:text-slate-400">Jl. Pemuda No. 148, Semarang</p>
             <p className="text-slate-500 dark:text-slate-400">Telp: (024) 3513366</p>
             <p className="text-slate-500 dark:text-slate-400">Email: bpbj@semarangkota.go.id</p>

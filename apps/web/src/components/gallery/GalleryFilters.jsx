@@ -8,33 +8,34 @@ export default function GalleryFilters({
   categories = [GALLERY_CATEGORY_ALL, ...GALLERY_CATEGORIES],
 }) {
   return (
-    <section className="max-w-7xl mx-auto px-6 mb-8">
-      <div className="flex flex-col md:flex-row justify-between items-start gap-4 py-4 border-t border-outline-variant/20">
-        <div className="flex flex-wrap gap-3">
+    <section className="mx-auto mb-10 max-w-7xl px-5 sm:px-6">
+      <div className="rounded-lg border border-slate-200 bg-white p-4">
+        <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="relative w-full lg:max-w-sm">
+            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+          <input 
+            type="text" 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Cari judul atau lokasi galeri..."
+              className="h-11 w-full rounded-md border border-slate-200 bg-white pl-12 pr-4 text-sm font-medium text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
+          />
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
           {categories.map((cat) => (
-            <button 
+            <button
               key={cat}
               onClick={() => setCategoryFilter(cat)}
-              className={`px-6 py-2 font-medium rounded-full text-sm transition-colors ${
-                categoryFilter === cat 
-                  ? 'bg-primary text-on-primary font-bold' 
-                  : 'bg-surface-container-low hover:bg-surface-container-high'
+              className={`rounded-md px-4 py-2 text-sm font-bold transition-colors ${
+                categoryFilter === cat
+                  ? 'bg-primary text-white'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
               {cat}
             </button>
           ))}
-        </div>
-        
-        <div className="relative w-full md:w-64 flex-shrink-0">
-          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-          <input 
-            type="text" 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search activities..." 
-            className="w-full bg-surface-container-low border-none rounded-lg pl-12 pr-4 py-2 text-sm font-medium focus:ring-2 focus:ring-primary outline-none"
-          />
         </div>
       </div>
     </section>

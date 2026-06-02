@@ -5,7 +5,7 @@ export default function FeaturedNews({ newsData = [] }) {
   if (newsData.length === 0) return null;
 
   const featuredArticle = newsData.find(item => item.isFeatured) || newsData[0];
-  const sidebarArticles = newsData.filter(item => !item.isFeatured && item.id !== featuredArticle.id).slice(0, 2);
+  const sidebarArticles = newsData.filter(item => item.isSelected && item.id !== featuredArticle.id).slice(0, 5);
   const featuredCategory = getNewsCategory(featuredArticle.category);
 
   const formatDate = (dateString) => {
@@ -15,43 +15,45 @@ export default function FeaturedNews({ newsData = [] }) {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-16">
-      {/* Featured News (Large) */}
-      <Link to={`/news/${featuredArticle.id}`} className="md:col-span-8 group cursor-pointer block">
-        <div className="relative overflow-hidden rounded-xl bg-surface-container-low aspect-[16/9] mb-6">
-          <img alt={featuredArticle.category} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src={featuredArticle.imageUrl || 'https://via.placeholder.com/800x450'}/>
-          {featuredArticle.isFeatured && (
-            <div className="absolute top-4 left-4">
-              <span className="px-4 py-1.5 bg-tertiary-container text-white text-[10px] font-black uppercase tracking-widest rounded-sm">PENGUMUMAN UTAMA</span>
+    <section className="mb-12 overflow-hidden rounded-lg border border-slate-200 bg-white">
+      <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr]">
+        <Link to={`/news/${featuredArticle.id}`} className="group block">
+          <div className="aspect-[16/10] overflow-hidden bg-slate-100">
+            <img alt={featuredArticle.category} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" src={featuredArticle.imageUrl || 'https://via.placeholder.com/800x450'}/>
+          </div>
+          <div className="p-6 sm:p-8">
+            <div className="mb-3 flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-wide">
+              <span className="rounded-md bg-primary px-2.5 py-1 text-white">Sorotan</span>
+              <span className="text-slate-500">{formatDate(featuredArticle.date)}</span>
+              {featuredCategory && <span className="text-primary/80">{featuredCategory}</span>}
             </div>
+            <h2 className="text-2xl font-bold leading-tight tracking-tight text-slate-950 transition-colors group-hover:text-primary md:text-3xl">{featuredArticle.title}</h2>
+            {featuredArticle.summary && <p className="mt-4 line-clamp-3 text-sm font-medium leading-7 text-slate-600">{featuredArticle.summary}</p>}
+            <span className="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase text-primary transition-all group-hover:gap-3">
+              Baca Selengkapnya <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </span>
+          </div>
+        </Link>
+
+        <div className="border-t border-slate-200 lg:border-l lg:border-t-0">
+          <div className="border-b border-slate-200 px-5 py-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Berita Pilihan</p>
+          </div>
+          {sidebarArticles.length > 0 ? sidebarArticles.map(article => (
+            <Link to={`/news/${article.id}`} key={article.id} className="group grid grid-cols-[112px_1fr] gap-4 border-b border-slate-100 p-5 last:border-b-0">
+              <div className="aspect-[4/3] overflow-hidden rounded-md bg-slate-100">
+                <img alt={article.category} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" src={article.imageUrl || 'https://via.placeholder.com/400x300'}/>
+              </div>
+              <div className="min-w-0">
+                <span className="mb-2 block text-[10px] font-semibold uppercase tracking-wide text-primary/80">{getNewsCategory(article.category)}</span>
+                <h3 className="line-clamp-2 text-base font-bold leading-snug text-slate-900 transition-colors group-hover:text-primary">{article.title}</h3>
+              </div>
+            </Link>
+          )) : (
+            <div className="p-5 text-sm font-medium leading-6 text-slate-500">Belum ada berita pilihan. Tandai maksimal 5 berita dari admin.</div>
           )}
         </div>
-        <div>
-          <div className="flex items-center gap-4 text-xs font-bold text-primary mb-3 uppercase tracking-wider">
-            <span>{formatDate(featuredArticle.date)}</span>
-            {featuredCategory && (
-              <>
-                <span className="w-1.5 h-1.5 rounded-full bg-surface-variant"></span>
-                <span>{featuredCategory}</span>
-              </>
-            )}
-          </div>
-          <h2 className="text-3xl font-extrabold tracking-tight text-on-surface group-hover:text-primary transition-colors leading-tight">{featuredArticle.title}</h2>
-        </div>
-      </Link>
-
-      {/* Sidebar News Items */}
-      <div className="md:col-span-4 flex flex-col gap-8">
-        {sidebarArticles.map(article => (
-          <Link to={`/news/${article.id}`} key={article.id} className="group cursor-pointer block">
-            <div className="aspect-[4/3] rounded-xl overflow-hidden bg-surface-container-low mb-4">
-              <img alt={article.category} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={article.imageUrl || 'https://via.placeholder.com/400x300'}/>
-            </div>
-            <span className="text-[10px] font-black text-tertiary uppercase tracking-widest mb-2 block">{article.category}</span>
-            <h3 className="text-lg font-bold leading-tight group-hover:text-primary transition-colors">{article.title}</h3>
-          </Link>
-        ))}
       </div>
-    </div>
+    </section>
   );
 }

@@ -3,7 +3,8 @@ import { db } from '../config/db';
 import { contacts } from '../db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { verifyAuth, requireRole } from '../middlewares/auth';
-import { validateConfirmationText, validateContactPayload, validateContactStatus, validateUuid } from '../utils/validation';
+import { validateConfirmationText, validateContactPayload, validateContactReplyPayload, validateContactStatus, validateUuid } from '../utils/validation';
+import { sendMail } from '../utils/email';
 
 const router = Router();
 
@@ -53,6 +54,49 @@ router.put('/:id/status', verifyAuth, requireRole(['admin', 'superadmin']), asyn
       
     if (updated.length === 0) return res.status(404).json({ error: 'Not found' });
     return res.json(updated[0]);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST reply to contact message (Admin/Superadmin)
+router.post('/:id/reply', verifyAuth, requireRole(['admin', 'superadmin']), async (req, res) => {
+  try {
+    const id = validateUuid(req.params.id);
+    if (!id.ok) return res.status(400).json({ error: id.error });
+    const payload = validateContactReplyPayload(req.body);
+    if (!payload.ok) return res.status(400).json({ error: payload.error });
+
+    const existing = await db.select().from(contacts).where(eq(contacts.id, id.data)).limit(1);
+    if (existing.length === 0) return res.status(404).json({ error: 'Not found' });
+
+    let emailSent = false;
+    try {
+      emailSent = await sendMail({
+        to: existing[0].email,
+        subject: payload.data.replySubject,
+        text: payload.data.replyMessage,
+      });
+    } catch (error) {
+      console.error('Reply email failed:', error);
+    }
+
+    const now = new Date();
+    const updated = await db.update(contacts)
+      .set({
+        status: 'REPLIED',
+        replySubject: payload.data.replySubject,
+        replyMessage: payload.data.replyMessage,
+        repliedAt: now,
+        repliedBy: (req as any).user?.id,
+        emailSentAt: emailSent ? now : null,
+        updatedAt: now,
+      })
+      .where(eq(contacts.id, id.data))
+      .returning();
+
+    return res.json({ ...updated[0], emailSent });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Internal server error' });

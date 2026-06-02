@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
 });
 
 // Update the welcome message
-router.put('/', verifyAuth, requireRole(['admin', 'superadmin']), async (req, res) => {
+router.put('/', verifyAuth, requireRole(['superadmin']), async (req, res) => {
   try {
     const payload = validateWelcomePayload(req.body);
     if (!payload.ok) return res.status(400).json({ error: payload.error });

@@ -3,10 +3,23 @@ import ContactInfo from '../components/contact/ContactInfo';
 import MapCard from '../components/contact/MapCard';
 import ContactForm from '../components/contact/ContactForm';
 import SocialTrustBar from '../components/contact/SocialTrustBar';
+import SEOHead from '../components/SEOHead';
+import { faqSchema, generateBreadcrumbSchema, organizationSchema, pageSEO } from '../utils/seoConfig';
 
 export default function ContactPage() {
   return (
     <main className="flex-grow pb-16 w-full">
+      <SEOHead
+        {...pageSEO.contact}
+        schemas={[
+          organizationSchema,
+          faqSchema,
+          generateBreadcrumbSchema([
+            { name: 'Beranda', url: '/' },
+            { name: 'Kontak', url: '/contact' },
+          ]),
+        ]}
+      />
       <ContactHero />
       <section className="max-w-7xl mx-auto px-6 -mt-16 relative z-10 pb-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

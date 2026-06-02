@@ -1,9 +1,36 @@
 import { Request, Response, NextFunction } from 'express';
 import { auth } from '../auth/auth';
 import { fromNodeHeaders } from 'better-auth/node';
+import { db } from '../config/db';
+import { session as sessionTable, user as userTable } from '../db/schema';
+import { eq } from 'drizzle-orm';
+import { cookieName, parseCookies } from '../routes/authSession';
 
 export const verifyAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const token = parseCookies(req.headers.cookie)[cookieName];
+    if (token) {
+      const rows = await db.select({
+        expiresAt: sessionTable.expiresAt,
+        user: {
+          id: userTable.id,
+          name: userTable.name,
+          email: userTable.email,
+          image: userTable.image,
+          role: userTable.role,
+        },
+      })
+        .from(sessionTable)
+        .innerJoin(userTable, eq(sessionTable.userId, userTable.id))
+        .where(eq(sessionTable.token, token))
+        .limit(1);
+
+      if (rows.length > 0 && rows[0].expiresAt > new Date()) {
+        (req as any).user = rows[0].user;
+        return next();
+      }
+    }
+
     const session = await auth.api.getSession({
       headers: fromNodeHeaders(req.headers)
     });

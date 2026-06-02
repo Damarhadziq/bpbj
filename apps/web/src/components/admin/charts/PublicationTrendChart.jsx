@@ -1,4 +1,11 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
+
+function getItemDate(item) {
+  const dateVal = item.date || item.createdAt || item.updatedAt;
+  if (!dateVal) return null;
+  const date = new Date(dateVal);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
 
 export default function PublicationTrendChart({ news = [], gallery = [] }) {
   const [showNews, setShowNews] = useState(true);
@@ -7,14 +14,16 @@ export default function PublicationTrendChart({ news = [], gallery = [] }) {
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const containerRef = useRef(null);
 
-  // Get last 6 months trend data
+  // Get 6 months relative to latest available content, so older seeded data remains readable.
   const trendData = (() => {
     const months = [];
-    const now = new Date();
+    const itemDates = [...news, ...gallery].map(getItemDate).filter(Boolean);
+    const latestDate = itemDates.length > 0
+      ? new Date(Math.max(...itemDates.map((date) => date.getTime())))
+      : new Date();
     
-    // Generate the last 6 months
     for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const d = new Date(latestDate.getFullYear(), latestDate.getMonth() - i, 1);
       months.push({
         date: d,
         label: d.toLocaleDateString('id-ID', { month: 'short' }),
@@ -27,9 +36,8 @@ export default function PublicationTrendChart({ news = [], gallery = [] }) {
 
     // Aggregate news
     news.forEach(item => {
-      const dateVal = item.date || item.createdAt;
-      if (!dateVal) return;
-      const itemDate = new Date(dateVal);
+      const itemDate = getItemDate(item);
+      if (!itemDate) return;
       months.forEach(m => {
         if (itemDate.getMonth() === m.monthVal && itemDate.getFullYear() === m.year) {
           m.newsCount++;
@@ -39,9 +47,8 @@ export default function PublicationTrendChart({ news = [], gallery = [] }) {
 
     // Aggregate gallery
     gallery.forEach(item => {
-      const dateVal = item.date || item.createdAt;
-      if (!dateVal) return;
-      const itemDate = new Date(dateVal);
+      const itemDate = getItemDate(item);
+      if (!itemDate) return;
       months.forEach(m => {
         if (itemDate.getMonth() === m.monthVal && itemDate.getFullYear() === m.year) {
           m.galleryCount++;
@@ -49,12 +56,11 @@ export default function PublicationTrendChart({ news = [], gallery = [] }) {
       });
     });
 
-    // Fallback base data if all aggregates are 0
+    // Fallback base data only when there is no dated content at all.
     const totalNews = months.reduce((acc, m) => acc + m.newsCount, 0);
     const totalGallery = months.reduce((acc, m) => acc + m.galleryCount, 0);
 
-    if (totalNews === 0 && totalGallery === 0) {
-      // Mock trends that are highly realistic and visually stunning
+    if (itemDates.length === 0 && totalNews === 0 && totalGallery === 0) {
       const baseNews = [8, 14, 9, 21, 15, 24];
       const baseGallery = [4, 8, 12, 7, 10, 16];
       months.forEach((m, idx) => {
@@ -119,7 +125,6 @@ export default function PublicationTrendChart({ news = [], gallery = [] }) {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
 
     // Scale mouse relative to SVG coordinate space
     const svgX = (x / rect.width) * chartWidth;
@@ -140,7 +145,12 @@ export default function PublicationTrendChart({ news = [], gallery = [] }) {
     
     // Set tooltip coordinates in pixels
     const pxX = (getX(closestIdx) / chartWidth) * rect.width;
-    const pxY = (Math.min(getY(trendData[closestIdx].newsCount), getY(trendData[closestIdx].galleryCount)) / chartHeight) * rect.height;
+    const activeValues = [
+      showNews ? trendData[closestIdx].newsCount : null,
+      showGallery ? trendData[closestIdx].galleryCount : null,
+    ].filter((value) => value !== null);
+    const tooltipValue = activeValues.length > 0 ? Math.max(...activeValues) : 0;
+    const pxY = (getY(tooltipValue) / chartHeight) * rect.height;
     setTooltipPos({ x: pxX, y: pxY });
   };
 
@@ -152,20 +162,20 @@ export default function PublicationTrendChart({ news = [], gallery = [] }) {
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map(r => Math.round(r * maxVal));
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col h-full">
+    <div className="flex h-full flex-col rounded-lg border border-[#ececec] bg-white p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h3 className="text-lg font-bold text-slate-800">Tren Publikasi Konten</h3>
-          <p className="text-xs text-slate-400 font-medium">Statistik publikasi berita & galeri foto 6 bulan terakhir</p>
+          <h3 className="text-lg font-semibold text-slate-900">Tren Publikasi Konten</h3>
+          <p className="text-xs text-slate-500 font-normal">Statistik publikasi berita & galeri foto 6 bulan terakhir</p>
         </div>
         
         {/* Interactive Legends */}
         <div className="flex gap-3 text-xs">
           <button 
             onClick={() => setShowNews(!showNews)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full font-bold border transition-all duration-200 ${
+            className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-medium transition-all duration-200 ${
               showNews 
-                ? 'bg-rose-50 text-rose-700 border-rose-100 shadow-sm' 
+                ? 'bg-rose-50 text-rose-700 border-rose-100' 
                 : 'bg-slate-50 text-slate-400 border-slate-200 opacity-60'
             }`}
           >
@@ -175,9 +185,9 @@ export default function PublicationTrendChart({ news = [], gallery = [] }) {
           
           <button 
             onClick={() => setShowGallery(!showGallery)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full font-bold border transition-all duration-200 ${
+            className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-medium transition-all duration-200 ${
               showGallery 
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-100 shadow-sm' 
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-100' 
                 : 'bg-slate-50 text-slate-400 border-slate-200 opacity-60'
             }`}
           >
@@ -228,7 +238,7 @@ export default function PublicationTrendChart({ news = [], gallery = [] }) {
                   y={y + 3} 
                   fill="#94a3b8" 
                   fontSize="10" 
-                  fontWeight="bold"
+                  fontWeight="500"
                   textAnchor="end"
                 >
                   {val}
@@ -247,7 +257,7 @@ export default function PublicationTrendChart({ news = [], gallery = [] }) {
                 y={chartHeight - padding.bottom + 18} 
                 fill="#94a3b8" 
                 fontSize="10" 
-                fontWeight="bold"
+                fontWeight="500"
                 textAnchor="middle"
                 className="opacity-90"
               >
@@ -311,7 +321,6 @@ export default function PublicationTrendChart({ news = [], gallery = [] }) {
                     fill="#10b981" 
                     stroke="white" 
                     strokeWidth="2" 
-                    className="shadow-sm"
                   />
                   <circle 
                     cx={getX(hoveredIdx)} 
@@ -331,7 +340,6 @@ export default function PublicationTrendChart({ news = [], gallery = [] }) {
                     fill="#9e0000" 
                     stroke="white" 
                     strokeWidth="2" 
-                    className="shadow-sm"
                   />
                   <circle 
                     cx={getX(hoveredIdx)} 
@@ -349,14 +357,14 @@ export default function PublicationTrendChart({ news = [], gallery = [] }) {
         {/* Custom Glassmorphic Tooltip */}
         {hoveredIdx !== null && (
           <div 
-            className="absolute bg-white/90 backdrop-blur-md shadow-xl border border-slate-100 p-3 rounded-xl z-50 pointer-events-none transition-all duration-100 ease-out flex flex-col gap-1 text-[11px] font-bold text-slate-700 min-w-[110px]"
+            className="absolute z-50 flex min-w-[110px] pointer-events-none flex-col gap-1 rounded-lg border border-slate-200 bg-white/95 p-3 text-[11px] font-medium text-slate-700 shadow-lg shadow-slate-950/10 backdrop-blur-md transition-all duration-100 ease-out"
             style={{ 
               left: `${tooltipPos.x}px`, 
               top: `${tooltipPos.y - 12}px`,
               transform: 'translate(-50%, -100%)' 
             }}
           >
-            <div className="text-slate-400 font-bold border-b border-slate-100 pb-1 mb-1 text-center capitalize">
+            <div className="text-slate-400 font-medium border-b border-slate-100 pb-1 mb-1 text-center capitalize">
               {trendData[hoveredIdx].date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
             </div>
             {showNews && (
@@ -365,7 +373,7 @@ export default function PublicationTrendChart({ news = [], gallery = [] }) {
                   <span className="w-1.5 h-1.5 rounded-full bg-[#9e0000]" />
                   Berita
                 </span>
-                <span className="text-slate-800 font-black">{trendData[hoveredIdx].newsCount}</span>
+                <span className="text-slate-800 font-semibold">{trendData[hoveredIdx].newsCount}</span>
               </div>
             )}
             {showGallery && (
@@ -374,7 +382,7 @@ export default function PublicationTrendChart({ news = [], gallery = [] }) {
                   <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
                   Galeri
                 </span>
-                <span className="text-slate-800 font-black">{trendData[hoveredIdx].galleryCount}</span>
+                <span className="text-slate-800 font-semibold">{trendData[hoveredIdx].galleryCount}</span>
               </div>
             )}
           </div>

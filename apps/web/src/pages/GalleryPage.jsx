@@ -5,6 +5,8 @@ import GalleryGrid from '../components/gallery/GalleryGrid';
 import Pagination from '../components/news/Pagination';
 import { useGallery } from '../hooks/useGallery';
 import { GALLERY_CATEGORIES, GALLERY_CATEGORY_ALL, galleryCategoryMatches, getGalleryCategory } from '../constants/categories';
+import SEOHead from '../components/SEOHead';
+import { generateBreadcrumbSchema, pageSEO } from '../utils/seoConfig';
 
 export default function GalleryPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,17 +22,26 @@ export default function GalleryPage() {
     ...Array.from(new Set(galleryData.map((item) => getGalleryCategory(item.category))))
       .filter((category) => category && !GALLERY_CATEGORIES.includes(category)),
   ];
+  const seoSchemas = [
+    generateBreadcrumbSchema([
+      { name: 'Beranda', url: '/' },
+      { name: 'Galeri', url: '/gallery' },
+    ]),
+  ];
 
   if (isLoading) {
     return (
       <main className="flex-grow pb-16 w-full flex items-center justify-center min-h-[50vh]">
+        <SEOHead {...pageSEO.gallery} schemas={seoSchemas} />
+        <h1 className="sr-only">Galeri Kegiatan BPBJ Kota Semarang</h1>
         <p className="text-on-surface-variant">Memuat galeri...</p>
       </main>
     );
   }
 
   const filteredGallery = galleryData.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const query = searchQuery.toLowerCase();
+    const matchesSearch = item.title.toLowerCase().includes(query) || (item.location || '').toLowerCase().includes(query);
     const matchesCategory = galleryCategoryMatches(item.category, categoryFilter);
     return matchesSearch && matchesCategory;
   });
@@ -42,7 +53,11 @@ export default function GalleryPage() {
   );
 
   return (
-    <main className="flex-grow pb-16 w-full">
+    <main className="w-full flex-grow bg-slate-50 pb-16">
+      <SEOHead
+        {...pageSEO.gallery}
+        schemas={seoSchemas}
+      />
       <GalleryHero />
       <GalleryFilters 
         searchQuery={searchQuery}

@@ -4,7 +4,8 @@ const navItems = [
   { id: 'tentang-kami', label: 'Tentang Kami' },
   { id: 'visi-misi', label: 'Visi & Misi' },
   { id: 'tugas-fungsi', label: 'Tugas & Fungsi' },
-  { id: 'struktur', label: 'Struktur Organisasi' }
+  { id: 'struktur', label: 'Struktur Organisasi' },
+  { id: 'pegawai', label: 'Pegawai BPBJ' }
 ];
 
 export default function ProfileSidebar() {
@@ -41,7 +42,6 @@ export default function ProfileSidebar() {
 
   return (
     <div className="sticky top-32">
-      <p className="text-xs font-bold text-primary mb-6 tracking-widest uppercase">Navigasi Profil</p>
       <nav className="space-y-1">
         {navItems.map(item => {
           const isActive = activeSection === item.id;

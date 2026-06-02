@@ -66,17 +66,17 @@ export default function VisitorAnalyticsChart() {
   const centerDisplay = getCenterDisplay();
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col h-full">
+    <div className="flex h-full flex-col rounded-lg border border-[#ececec] bg-white p-6">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-lg font-bold text-slate-800">Pengunjung Website</h3>
-          <p className="text-xs text-slate-400 font-medium">Analisis perangkat akses pengunjung unik berbasis sesi</p>
+          <h3 className="text-lg font-semibold text-slate-900">Pengunjung Website</h3>
+          <p className="text-xs text-slate-500 font-normal">Analisis perangkat akses pengunjung unik berbasis sesi</p>
         </div>
         
         <button
           onClick={() => refetch()}
           title="Muat ulang data pengunjung"
-          className="flex items-center justify-center p-1.5 rounded-xl border border-slate-100 text-slate-400 hover:text-rose-700 hover:border-rose-100 hover:bg-rose-50/50 transition-all duration-200 shadow-sm"
+          className="flex items-center justify-center rounded-lg border border-slate-200 p-1.5 text-slate-400 transition-colors duration-200 hover:border-rose-100 hover:bg-rose-50/50 hover:text-rose-700"
         >
           <span className={`material-symbols-outlined text-[18px] ${isFetching ? 'animate-spin' : ''}`}>sync</span>
         </button>
@@ -143,10 +143,10 @@ export default function VisitorAnalyticsChart() {
 
           {/* Centered Statistics HUD */}
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none p-2">
-            <span className={`text-xl font-black tracking-tight leading-none ${centerDisplay.color}`}>
+            <span className={`text-xl font-semibold tracking-tight leading-none ${centerDisplay.color}`}>
               {centerDisplay.value.toLocaleString('id-ID')}
             </span>
-            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 mt-1">
+            <span className="text-[9px] font-medium uppercase tracking-wide text-slate-400 mt-1">
               {centerDisplay.label}
             </span>
             {centerDisplay.sub && (
@@ -165,9 +165,9 @@ export default function VisitorAnalyticsChart() {
             return (
               <div 
                 key={idx}
-                className={`flex items-center justify-between p-2 rounded-xl transition-all duration-200 border border-transparent ${
+                className={`flex items-center justify-between rounded-lg border border-transparent p-2 transition-colors duration-200 ${
                   isHovered 
-                    ? 'bg-slate-50 border-slate-100 scale-[1.03] shadow-sm' 
+                    ? 'bg-slate-50 border-slate-100' 
                     : 'hover:bg-slate-50/50'
                 }`}
                 onMouseEnter={() => setHoveredIdx(idx)}
@@ -175,19 +175,21 @@ export default function VisitorAnalyticsChart() {
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   {/* Status Indicator circle with custom gradient */}
-                  <span className="material-symbols-outlined text-[18px] text-slate-500">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-slate-600">
+                    <span className="material-symbols-outlined text-[18px]">
                     {seg.icon}
+                    </span>
                   </span>
                   
                   <div className="min-w-0 flex flex-col">
-                    <span className="text-xs font-bold text-slate-700 leading-none">{seg.label}</span>
-                    <span className="text-[10px] text-slate-400 font-semibold mt-0.5">{seg.count.toLocaleString('id-ID')} sesi</span>
+                    <span className="text-xs font-medium text-slate-700 leading-none">{seg.label}</span>
+                    <span className="text-[10px] text-slate-400 font-normal mt-0.5">{seg.count.toLocaleString('id-ID')} sesi</span>
                   </div>
                 </div>
 
                 <div className="text-right">
                   <span 
-                    className="text-xs font-black px-2 py-0.5 rounded-full border"
+                    className="text-xs font-medium px-2 py-0.5 rounded-full border"
                     style={{
                       borderColor: isHovered ? `${seg.colorHex}25` : '#f1f5f9',
                       backgroundColor: isHovered ? `${seg.colorHex}08` : '#f8f9fa',

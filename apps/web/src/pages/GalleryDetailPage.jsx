@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useGalleryDetail } from '../hooks/useGallery';
+import SEOHead from '../components/SEOHead';
+import { generateBreadcrumbSchema, generateImageGallerySchema } from '../utils/seoConfig';
 
 export default function GalleryDetailPage() {
   const { id } = useParams();
@@ -47,7 +49,7 @@ export default function GalleryDetailPage() {
       <main className="flex-grow pt-32 pb-16 w-full">
         <div className="px-6 max-w-7xl mx-auto w-full text-center">
           <h1 className="text-3xl font-bold text-on-surface mb-4">Galeri Tidak Ditemukan</h1>
-          <Link to="/gallery" className="text-primary hover:underline">Kembali ke Galeri</Link>
+          <Link to="/gallery" className="font-medium text-primary transition-colors hover:text-primary/80">Kembali ke Galeri</Link>
         </div>
       </main>
     );
@@ -67,6 +69,7 @@ export default function GalleryDetailPage() {
   const previewImages = images.length > 4 ? images.slice(0, 4) : images;
   const remainingImages = Math.max(images.length - 4, 0);
   const focusedImage = focusedImageIndex !== null ? images[focusedImageIndex] : null;
+  const coverImageUrl = coverImage?.imageUrl || item.imageUrl || 'https://via.placeholder.com/1200x800';
 
   const openLightbox = (index) => {
     setFocusedImageIndex(index);
@@ -99,9 +102,23 @@ export default function GalleryDetailPage() {
 
   return (
     <main className="flex-grow pt-32 pb-16 w-full">
+      <SEOHead
+        title={`${item.title} | Galeri BPBJ Kota Semarang`}
+        description={item.description}
+        path={`/gallery/${item.id}`}
+        image={coverImageUrl}
+        schemas={[
+          generateImageGallerySchema(item),
+          generateBreadcrumbSchema([
+            { name: 'Beranda', url: '/' },
+            { name: 'Galeri', url: '/gallery' },
+            { name: item.title, url: `/gallery/${item.id}` },
+          ]),
+        ]}
+      />
       <div className="px-6 max-w-5xl mx-auto w-full">
-        <Link to="/gallery" className="inline-flex items-center gap-2 text-primary font-bold text-sm hover:underline mb-8">
-          <span className="material-symbols-outlined text-sm">arrow_back</span>
+        <Link to="/gallery" className="group mb-8 inline-flex items-center gap-2 text-sm font-medium text-primary transition-colors hover:text-primary/80">
+          <span className="material-symbols-outlined text-sm transition-transform group-hover:-translate-x-0.5">arrow_back</span>
           Kembali ke Galeri
         </Link>
         
@@ -123,7 +140,7 @@ export default function GalleryDetailPage() {
           <img
             alt={coverImage?.imageAlt || item.imageAlt || item.title}
             className="w-full h-auto object-cover max-h-[70vh]"
-            src={coverImage?.imageUrl || item.imageUrl || 'https://via.placeholder.com/1200x800'}
+            src={coverImageUrl}
           />
         </div>
 

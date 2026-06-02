@@ -1,5 +1,5 @@
 export const NEWS_CATEGORY_ALL = 'Semua';
-export const NEWS_CATEGORIES = ['Pengumuman', 'Kegiatan', 'Layanan', 'Tender', 'Market Sounding'];
+export const NEWS_CATEGORIES = ['Informasi', 'Kegiatan', 'Layanan', 'Sosialisasi', 'Market Sounding'];
 
 export const GALLERY_CATEGORY_ALL = 'Semua Kegiatan';
 export const GALLERY_CATEGORIES = [
@@ -13,10 +13,12 @@ export const GALLERY_CATEGORIES = [
 const normalizeCategory = (category = '') => category.trim().toLowerCase();
 
 const NEWS_CATEGORY_ALIASES = {
-  pengumuman: 'Pengumuman',
+  informasi: 'Informasi',
+  pengumuman: 'Informasi',
   kegiatan: 'Kegiatan',
   layanan: 'Layanan',
-  tender: 'Tender',
+  sosialisasi: 'Sosialisasi',
+  tender: 'Sosialisasi',
   'market sounding': 'Market Sounding',
 };
 

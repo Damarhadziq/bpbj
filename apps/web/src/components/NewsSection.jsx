@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useNews } from '../hooks/useNews';
+import { getNewsCategory } from '../constants/categories';
 
 export default function NewsSection() {
   const { data: newsData = [], isLoading } = useNews();
@@ -33,9 +34,9 @@ export default function NewsSection() {
             <h2 className="text-4xl font-black tracking-tighter mb-4">Warta Pengadaan</h2>
             <p className="text-on-surface-variant max-w-xl">Informasi terkini seputar kebijakan, rilis tender, dan kegiatan Biro Pengadaan Barang dan Jasa Kota Semarang.</p>
           </div>
-          <Link to="/news" className="group flex items-center gap-2 text-primary font-bold">
+          <Link to="/news" className="group flex items-center gap-2 text-primary font-bold transition-all hover:gap-3">
             Lihat Semua Berita
-            <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+            <span className="material-symbols-outlined">arrow_forward</span>
           </Link>
         </div>
         
@@ -64,7 +65,7 @@ export default function NewsSection() {
                        alt={article.category}/>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="text-primary text-[10px] font-bold uppercase tracking-widest mb-1 block">{article.category}</span>
+                  <span className="text-primary text-[10px] font-bold uppercase tracking-widest mb-1 block">{getNewsCategory(article.category)}</span>
                   <h4 className="font-bold leading-tight group-hover:text-primary transition-colors line-clamp-3">{article.title}</h4>
                   <p className="text-xs text-on-surface-variant mt-2">{formatDate(article.date)}</p>
                 </div>

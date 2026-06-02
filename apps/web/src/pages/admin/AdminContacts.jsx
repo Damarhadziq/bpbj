@@ -1,24 +1,113 @@
-import { useState } from 'react';
-import { useContacts, useUpdateContactStatus, useDeleteContact } from '../../hooks/useContacts';
+import { useMemo, useState } from 'react';
+import { useContacts, useUpdateContactStatus, useDeleteContact, useReplyContact } from '../../hooks/useContacts';
+import { AdminButton, AdminModal, AdminPageHeader, AdminSelect, AdminTableCard, AdminTextarea, AdminTextInput } from '../../components/admin/AdminUI';
+
+const CONTACT_STATUS_ALL = 'ALL';
+const CONTACT_SUBJECT_ALL = 'ALL_SUBJECTS';
+const PAGE_SIZE_OPTIONS = [
+  { value: 10, label: '10 data' },
+  { value: 20, label: '20 data' },
+  { value: 50, label: '50 data' },
+  { value: 'all', label: 'Semua data' },
+];
+const SORT_OPTIONS = [
+  { value: 'newest', label: 'Terbaru' },
+  { value: 'oldest', label: 'Terlama' },
+];
+const STATUS_LABELS = {
+  UNREAD: 'Belum Dibaca',
+  READ: 'Sudah Dibaca',
+  REPLIED: 'Sudah Dibalas',
+};
+const REPLY_TEMPLATES = [
+  {
+    label: 'Pembuka',
+    text: 'Yth. Bapak/Ibu,\n\nTerima kasih telah menghubungi BPBJ Kota Semarang. Menanggapi pengaduan yang disampaikan, berikut kami sampaikan penjelasan kami.',
+  },
+  {
+    label: 'Penutup',
+    text: 'Demikian informasi yang dapat kami sampaikan. Apabila masih terdapat pertanyaan lanjutan, Bapak/Ibu dapat menghubungi kami kembali melalui kanal resmi BPBJ Kota Semarang.\n\nHormat kami,\nBPBJ Kota Semarang',
+  },
+];
 
 export default function AdminContacts() {
   const { data: contacts = [], isLoading } = useContacts();
   const updateStatusMutation = useUpdateContactStatus();
+  const replyMutation = useReplyContact();
   const deleteMutation = useDeleteContact();
   const [detailItem, setDetailItem] = useState(null);
   const [deleteItem, setDeleteItem] = useState(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [formError, setFormError] = useState('');
+  const [replyError, setReplyError] = useState('');
+  const [replyInfo, setReplyInfo] = useState('');
+  const [replyForm, setReplyForm] = useState({ replySubject: '', replyMessage: '' });
+  const [replyTemplateBlocks, setReplyTemplateBlocks] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedSubject, setSelectedSubject] = useState(CONTACT_SUBJECT_ALL);
+  const [selectedStatus, setSelectedStatus] = useState(CONTACT_STATUS_ALL);
+  const [sortOrder, setSortOrder] = useState('newest');
+  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const handleStatusChange = async (id, newStatus) => {
     await updateStatusMutation.mutateAsync({ id, status: newStatus });
   };
 
   const openDetails = async (contact) => {
-    setDetailItem(contact);
+    const initialContact = contact.status === 'UNREAD' ? { ...contact, status: 'READ' } : contact;
+    setDetailItem(initialContact);
+    setReplyError('');
+    setReplyInfo('');
+    setReplyForm({
+      replySubject: contact.replySubject || `Re: ${contact.subject || 'Pengaduan BPBJ Kota Semarang'}`,
+      replyMessage: contact.replyMessage || '',
+    });
+    setReplyTemplateBlocks([]);
     if (contact.status === 'UNREAD') {
-      await updateStatusMutation.mutateAsync({ id: contact.id, status: 'READ' });
+      const updatedContact = await updateStatusMutation.mutateAsync({ id: contact.id, status: 'READ' });
+      setDetailItem(updatedContact);
     }
+  };
+
+  const handleReplySubmit = async (event) => {
+    event.preventDefault();
+    setReplyError('');
+    setReplyInfo('');
+
+    try {
+      const templateMessage = replyTemplateBlocks.map((template) => template.text).join('\n\n');
+      const manualMessage = replyForm.replyMessage.trim();
+      const replyMessage = [templateMessage, manualMessage].filter(Boolean).join('\n\n');
+
+      if (!replyMessage) {
+        setReplyError('Isi balasan wajib diisi atau pilih template pembuka/penutup terlebih dahulu.');
+        return;
+      }
+
+      const updatedContact = await replyMutation.mutateAsync({
+        id: detailItem.id,
+        data: { ...replyForm, replyMessage },
+      });
+      setDetailItem(updatedContact);
+      setReplyTemplateBlocks([]);
+      setReplyForm({ replySubject: updatedContact.replySubject || replyForm.replySubject, replyMessage: updatedContact.replyMessage || '' });
+      setReplyInfo(updatedContact.emailSent
+        ? 'Balasan berhasil dikirim ke email pengadu dan tercatat di detail.'
+        : 'Balasan sudah tercatat. Email belum terkirim karena konfigurasi SMTP belum tersedia atau gagal tersambung.');
+    } catch (error) {
+      setReplyError(error.response?.data?.error || 'Balasan gagal diproses. Periksa isi balasan lalu coba lagi.');
+    }
+  };
+
+  const addReplyTemplate = (template) => {
+    setReplyTemplateBlocks((currentBlocks) => (
+      currentBlocks.some((block) => block.label === template.label) ? currentBlocks : [...currentBlocks, template]
+    ));
+  };
+
+  const removeReplyTemplate = (templateLabel) => {
+    setReplyTemplateBlocks((currentBlocks) => currentBlocks.filter((block) => block.label !== templateLabel));
   };
 
   const openDeleteModal = (contact) => {
@@ -56,78 +145,165 @@ export default function AdminContacts() {
     REPLIED: 'bg-green-50 text-green-700 border-green-200',
   };
 
-  const statusLabels = {
-    UNREAD: 'Belum Dibaca',
-    READ: 'Sudah Dibaca',
-    REPLIED: 'Sudah Dibalas',
-  };
+  const statusOptions = Object.entries(STATUS_LABELS).map(([value, label]) => ({ value, label }));
+  const statusFilterOptions = [
+    { value: CONTACT_STATUS_ALL, label: 'Semua status' },
+    ...statusOptions,
+  ];
+  const subjectFilterOptions = useMemo(() => [
+    { value: CONTACT_SUBJECT_ALL, label: 'Semua tag' },
+    ...Array.from(new Set(contacts.map((contact) => contact.subject || 'Tanpa subjek')))
+      .filter(Boolean)
+      .map((subject) => ({ value: subject, label: subject })),
+  ], [contacts]);
+  const filteredContacts = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+    const nextContacts = contacts.filter((contact) => {
+      const statusMatches = selectedStatus === CONTACT_STATUS_ALL || contact.status === selectedStatus;
+      const itemSubject = contact.subject || 'Tanpa subjek';
+      const subjectMatches = selectedSubject === CONTACT_SUBJECT_ALL || itemSubject === selectedSubject;
+      const searchMatches = !normalizedSearch || [
+        contact.name,
+        contact.email,
+      ].some((value) => String(value || '').toLowerCase().includes(normalizedSearch));
+
+      return statusMatches && subjectMatches && searchMatches;
+    });
+
+    return nextContacts.sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return sortOrder === 'oldest' ? dateA - dateB : dateB - dateA;
+    });
+  }, [contacts, searchTerm, selectedSubject, selectedStatus, sortOrder]);
+  const totalPages = pageSize === 'all' ? 1 : Math.max(1, Math.ceil(filteredContacts.length / pageSize));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const paginatedContacts = pageSize === 'all'
+    ? filteredContacts
+    : filteredContacts.slice((safeCurrentPage - 1) * pageSize, safeCurrentPage * pageSize);
 
   if (isLoading) {
     return <div className="text-center py-20 text-slate-400">Memuat data pengaduan...</div>;
   }
 
-  const unreadCount = contacts.filter((contact) => contact.status === 'UNREAD').length;
-
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">Pengaduan Masuk</h1>
-          <p className="text-slate-500 mt-1">
-            Total {contacts.length} pengaduan
-            {unreadCount > 0 && <span className="ml-2 px-2 py-0.5 bg-red-100 text-red-700 text-xs font-bold rounded-full">{unreadCount} belum dibaca</span>}
-          </p>
+      <AdminPageHeader
+        eyebrow="Kotak Masuk"
+        title="Kelola Pengaduan"
+      />
+
+      <div className="mb-5 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+        <div className="relative w-full xl:max-w-md">
+          <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">search</span>
+          <AdminTextInput
+            type="search"
+            value={searchTerm}
+            onChange={(event) => {
+              setSearchTerm(event.target.value);
+              setCurrentPage(1);
+            }}
+            placeholder="Cari nama atau email pengadu"
+            className="pl-10"
+          />
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:flex xl:items-center xl:justify-end">
+          <AdminSelect
+            value={selectedSubject}
+            onChange={(subject) => {
+              setSelectedSubject(subject);
+              setCurrentPage(1);
+            }}
+            options={subjectFilterOptions}
+            size="sm"
+            className="xl:w-44"
+          />
+          <AdminSelect
+            value={selectedStatus}
+            onChange={(status) => {
+              setSelectedStatus(status);
+              setCurrentPage(1);
+            }}
+            options={statusFilterOptions}
+            size="sm"
+            className="xl:w-40"
+          />
+          <AdminSelect
+            value={sortOrder}
+            onChange={(sort) => {
+              setSortOrder(sort);
+              setCurrentPage(1);
+            }}
+            options={SORT_OPTIONS}
+            size="sm"
+            className="xl:w-36"
+          />
+          <AdminSelect
+            value={pageSize}
+            onChange={(value) => {
+              setPageSize(value);
+              setCurrentPage(1);
+            }}
+            options={PAGE_SIZE_OPTIONS}
+            size="sm"
+            className="xl:w-36"
+          />
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
+      <AdminTableCard>
+          <table className="w-full table-fixed text-left">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Pengirim</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Subjek</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Pesan</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Tanggal</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Aksi</th>
+                <th className="w-[22%] px-6 py-4 text-xs font-medium text-slate-500 uppercase tracking-wide">Pengirim</th>
+                <th className="w-[16%] px-6 py-4 text-xs font-medium text-slate-500 uppercase tracking-wide">Subjek</th>
+                <th className="w-[20%] px-6 py-4 text-xs font-medium text-slate-500 uppercase tracking-wide">Pesan</th>
+                <th className="w-[18%] px-6 py-4 text-xs font-medium text-slate-500 uppercase tracking-wide">Tanggal</th>
+                <th className="w-[16%] px-6 py-4 text-xs font-medium text-slate-500 uppercase tracking-wide">Status</th>
+                <th className="w-[8%] px-6 py-4 text-xs font-medium text-slate-500 uppercase tracking-wide text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {contacts.map((contact) => (
-                <tr key={contact.id} className={`hover:bg-slate-50/50 transition-colors ${contact.status === 'UNREAD' ? 'bg-red-50/30' : ''}`}>
+              {paginatedContacts.map((contact) => (
+                <tr key={contact.id} className="bg-white transition-colors hover:bg-slate-50/50">
                   <td className="px-6 py-4">
-                    <p className="font-semibold text-slate-800">{contact.name}</p>
-                    <p className="text-xs text-slate-400">{contact.email}</p>
+                    <div className="flex min-w-0 items-center gap-2">
+                      {contact.status === 'UNREAD' && (
+                        <span className="relative inline-flex aspect-square h-1.5 flex-shrink-0 items-center justify-center" aria-label="Pesan baru">
+                          <span className="absolute -inset-0.5 animate-ping rounded-full bg-primary/60 opacity-70" />
+                          <span className="relative aspect-square h-1.5 rounded-full bg-primary" />
+                        </span>
+                      )}
+                      <p className="min-w-0 truncate font-semibold text-slate-800">{contact.name}</p>
+                    </div>
+                    <p className="mt-1 truncate text-xs text-slate-400">{contact.email}</p>
                   </td>
-                  <td className="px-6 py-4 text-sm text-slate-600 max-w-[150px] truncate">{contact.subject || '-'}</td>
-                  <td className="px-6 py-4 text-sm text-slate-500 max-w-[250px]">
-                    <p className="line-clamp-2">{contact.message}</p>
+                  <td className="px-6 py-4 text-sm text-slate-600 truncate">{contact.subject || '-'}</td>
+                  <td className="px-6 py-4 text-sm text-slate-500">
+                    <p className="truncate">{contact.message}</p>
                   </td>
                   <td className="px-6 py-4 text-sm text-slate-500 whitespace-nowrap">
                     <p>{formatDate(contact.createdAt)}</p>
-                    <p className="text-xs text-slate-400">Update: {formatDate(contact.updatedAt || contact.createdAt)}</p>
                   </td>
                   <td className="px-6 py-4">
-                    <select
+                    <AdminSelect
                       value={contact.status}
-                      onChange={(event) => handleStatusChange(contact.id, event.target.value)}
-                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg border cursor-pointer outline-none ${statusColors[contact.status] || 'bg-slate-50 text-slate-600 border-slate-200'}`}
-                    >
-                      <option value="UNREAD">{statusLabels.UNREAD}</option>
-                      <option value="READ">{statusLabels.READ}</option>
-                      <option value="REPLIED">{statusLabels.REPLIED}</option>
-                    </select>
+                      onChange={(newStatus) => handleStatusChange(contact.id, newStatus)}
+                      options={statusOptions}
+                      size="sm"
+                      className="w-36"
+                      buttonClassName={`${statusColors[contact.status] || 'bg-slate-50 text-slate-600 border-slate-200'} shadow-none`}
+                    />
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <button onClick={() => openDetails(contact)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Detail Pengaduan">
+                      <button onClick={() => openDetails(contact)} className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700" title="Detail Pengaduan">
                         <span className="material-symbols-outlined text-[18px]">visibility</span>
                       </button>
                       <button
                         onClick={() => openDeleteModal(contact)}
                         disabled={!['READ', 'REPLIED'].includes(contact.status)}
-                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-400"
+                        className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-400"
                         title="Hapus Pengaduan"
                       >
                         <span className="material-symbols-outlined text-[18px]">delete</span>
@@ -136,100 +312,184 @@ export default function AdminContacts() {
                   </td>
                 </tr>
               ))}
-              {contacts.length === 0 && (
+              {filteredContacts.length === 0 && (
                 <tr>
                   <td colSpan="6" className="px-6 py-16 text-center text-slate-400">
                     <span className="material-symbols-outlined text-5xl mb-3 opacity-30">forum</span>
-                    <p>Belum ada pengaduan masuk.</p>
+                    <p>{contacts.length === 0 ? 'Belum ada pengaduan masuk.' : 'Tidak ada pengaduan yang cocok dengan pencarian atau filter tag.'}</p>
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
-        </div>
-      </div>
+      </AdminTableCard>
 
-      {detailItem && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setDetailItem(null)}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(event) => event.stopPropagation()}>
-            <div className="sticky top-0 bg-white border-b border-slate-200 px-8 py-5 flex items-center justify-between rounded-t-2xl">
-              <h2 className="text-xl font-bold text-slate-800">Detail Pengaduan</h2>
-              <button onClick={() => setDetailItem(null)} className="p-1 text-slate-400 hover:text-slate-600">
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-            <div className="p-8 space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="rounded-xl bg-slate-50 p-4">
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Nama</p>
-                  <p className="font-semibold text-slate-800">{detailItem.name}</p>
-                </div>
-                <div className="rounded-xl bg-slate-50 p-4">
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Email</p>
-                  <a href={`mailto:${detailItem.email}`} className="font-semibold text-primary break-all">{detailItem.email}</a>
-                </div>
-                <div className="rounded-xl bg-slate-50 p-4">
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Dikirim</p>
-                  <p className="font-semibold text-slate-800">{formatDate(detailItem.createdAt)}</p>
-                </div>
-                <div className="rounded-xl bg-slate-50 p-4">
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Terakhir Update</p>
-                  <p className="font-semibold text-slate-800">{formatDate(detailItem.updatedAt || detailItem.createdAt)}</p>
-                </div>
-              </div>
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Subjek</p>
-                <p className="text-lg font-bold text-slate-800">{detailItem.subject || 'Tanpa subjek'}</p>
-              </div>
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Isi Pengaduan</p>
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-slate-700 leading-relaxed whitespace-pre-wrap">
-                  {detailItem.message}
-                </div>
-              </div>
-              <div className="flex justify-end">
-                <a href={`mailto:${detailItem.email}?subject=Re: ${detailItem.subject || 'Pengaduan BPBJ Kota Semarang'}`} className="px-5 py-2.5 bg-primary text-white rounded-xl font-medium hover:bg-primary/90 transition-colors">
-                  Balas via Email
-                </a>
-              </div>
-            </div>
+      {filteredContacts.length > 0 && pageSize !== 'all' && (
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm font-medium text-slate-500">
+            Halaman {safeCurrentPage} dari {totalPages}
+          </p>
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+              disabled={safeCurrentPage === 1}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+              Sebelumnya
+            </button>
+            <button
+              type="button"
+              onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+              disabled={safeCurrentPage === totalPages}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Berikutnya
+              <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+            </button>
           </div>
         </div>
       )}
 
-      {deleteItem && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setDeleteItem(null)}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg" onClick={(event) => event.stopPropagation()}>
-            <div className="border-b border-slate-200 px-8 py-5 flex items-center justify-between rounded-t-2xl">
-              <h2 className="text-xl font-bold text-slate-800">Hapus Pengaduan</h2>
-              <button onClick={() => setDeleteItem(null)} className="p-1 text-slate-400 hover:text-slate-600">
-                <span className="material-symbols-outlined">close</span>
-              </button>
+      {detailItem && (
+        <AdminModal eyebrow="Kotak Masuk" title="Detail Pengaduan" onClose={() => setDetailItem(null)} maxWidth="max-w-3xl">
+            <div className="p-8 space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="rounded-lg bg-slate-50 p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1">Nama</p>
+                  <p className="font-semibold text-slate-800">{detailItem.name}</p>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1">Email</p>
+                  <a href={`mailto:${detailItem.email}`} className="font-semibold text-primary break-all">{detailItem.email}</a>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1">Dikirim</p>
+                  <p className="font-semibold text-slate-800">{formatDate(detailItem.createdAt)}</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-2">Subjek</p>
+                <p className="text-lg font-medium text-slate-800">{detailItem.subject || 'Tanpa subjek'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-2">Isi Pengaduan</p>
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-5 text-slate-700 leading-relaxed whitespace-pre-wrap">
+                  {detailItem.message}
+                </div>
+              </div>
+              {detailItem.replyMessage && (
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-2">Balasan Tercatat</p>
+                  <div className="rounded-lg border border-green-100 bg-green-50 p-5 text-slate-700">
+                    <p className="font-semibold text-slate-900">{detailItem.replySubject}</p>
+                    <p className="mt-3 whitespace-pre-wrap leading-relaxed">{detailItem.replyMessage}</p>
+                    <p className="mt-4 text-xs font-medium text-green-700">
+                      {detailItem.emailSentAt ? `Email terkirim pada ${formatDate(detailItem.emailSentAt)}` : 'Balasan tersimpan, email belum tercatat terkirim.'}
+                    </p>
+                  </div>
+                </div>
+              )}
+              <form onSubmit={handleReplySubmit} className="space-y-4 rounded-lg border border-slate-200 bg-white p-5">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-primary">Balas Pengaduan</p>
+                  <p className="mt-1 text-sm text-slate-500">Balasan akan dicatat di detail dan dikirim ke email pengadu jika SMTP sudah dikonfigurasi.</p>
+                  <p className="mt-1 text-xs font-medium text-slate-400">Email pengirim mengikuti konfigurasi server: SMTP_FROM, atau SMTP_USER jika SMTP_FROM kosong.</p>
+                </div>
+                {replyError && <div className="rounded-lg border border-red-100 bg-red-50 p-3 text-sm font-medium text-red-600">{replyError}</div>}
+                {replyInfo && <div className="rounded-lg border border-blue-100 bg-blue-50 p-3 text-sm font-medium text-blue-700">{replyInfo}</div>}
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-slate-700">Subjek Balasan</label>
+                  <AdminTextInput
+                    value={replyForm.replySubject}
+                    onChange={(event) => setReplyForm({ ...replyForm, replySubject: event.target.value })}
+                    required
+                    placeholder="Tulis subjek balasan"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-slate-700">Isi Balasan</label>
+                  <div className="mb-2 flex flex-wrap gap-2">
+                    {REPLY_TEMPLATES.map((template) => {
+                      const isSelected = replyTemplateBlocks.some((block) => block.label === template.label);
+                      return (
+                        <button
+                          key={template.label}
+                          type="button"
+                          onClick={() => addReplyTemplate(template)}
+                          disabled={isSelected}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">add_notes</span>
+                          {template.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {replyTemplateBlocks.length > 0 && (
+                    <div className="mb-3 space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      {replyTemplateBlocks.map((template) => (
+                        <div key={template.label} className="rounded-lg border border-slate-200 bg-white p-3">
+                          <div className="mb-2 flex items-center justify-between gap-3">
+                            <span className="text-xs font-semibold uppercase tracking-wide text-primary">{template.label}</span>
+                            <button
+                              type="button"
+                              onClick={() => removeReplyTemplate(template.label)}
+                              className="flex h-7 w-7 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-red-600"
+                              aria-label={`Hapus template ${template.label}`}
+                            >
+                              <span className="material-symbols-outlined text-[17px]">close</span>
+                            </button>
+                          </div>
+                          <p className="whitespace-pre-wrap text-sm leading-6 text-slate-600">{template.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <AdminTextarea
+                    value={replyForm.replyMessage}
+                    onChange={(event) => setReplyForm({ ...replyForm, replyMessage: event.target.value })}
+                    rows={6}
+                    placeholder="Tulis isi balasan tambahan untuk pengadu"
+                  />
+                </div>
+                <div className="flex justify-end">
+                  <AdminButton type="submit" disabled={replyMutation.isPending}>
+                    {replyMutation.isPending && <span className="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>}
+                    Kirim Balasan
+                  </AdminButton>
+                </div>
+              </form>
             </div>
+        </AdminModal>
+      )}
+
+      {deleteItem && (
+        <AdminModal eyebrow="Aksi Berisiko" title="Hapus Pengaduan" onClose={() => setDeleteItem(null)} maxWidth="max-w-lg">
             <form onSubmit={handleDelete} className="p-8 space-y-5">
-              <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
                 Pengaduan dari <strong>{deleteItem.name}</strong> akan dihapus permanen. Pengaduan hanya bisa dihapus setelah berstatus sudah dibaca atau sudah dibalas.
               </div>
               {formError && <div className="rounded-lg border border-red-100 bg-red-50 p-3 text-sm font-medium text-red-600">{formError}</div>}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Ketik DELETE untuk konfirmasi</label>
-                <input
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Ketik DELETE untuk konfirmasi</label>
+                <AdminTextInput
                   type="text"
                   required
                   value={deleteConfirmation}
                   onChange={(event) => setDeleteConfirmation(event.target.value)}
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                  placeholder="Ketik DELETE"
                 />
               </div>
               <div className="flex justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setDeleteItem(null)} className="px-5 py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl font-medium transition-colors">Batal</button>
-                <button type="submit" disabled={deleteMutation.isPending} className="px-6 py-2.5 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-colors disabled:opacity-50">
+                <AdminButton type="button" variant="neutral" onClick={() => setDeleteItem(null)}>Batal</AdminButton>
+                <AdminButton type="submit" disabled={deleteMutation.isPending} variant="danger">
                   Hapus Pengaduan
-                </button>
+                </AdminButton>
               </div>
             </form>
-          </div>
-        </div>
+        </AdminModal>
       )}
     </div>
   );

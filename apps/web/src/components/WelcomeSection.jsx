@@ -47,19 +47,11 @@ export default function WelcomeSection() {
               </div>
 
               {/* Name card overlapping the photo */}
-              <div className="relative -mt-20 mx-4 bg-white rounded-xl shadow-xl p-5 border border-gray-100">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="white" className="w-4 h-4">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                    </svg>
-                  </div>
-                  <div className="w-10 h-0.5 bg-primary/30 rounded-full" />
-                </div>
-                <h3 className="text-lg font-bold text-on-surface tracking-tight leading-snug">
+              <div className="relative -mt-20 mx-4 rounded-xl bg-white p-5 text-center shadow-xl">
+                <h3 className="text-xl font-bold text-on-surface tracking-tight leading-snug">
                   {name}
                 </h3>
-                <p className="text-sm text-on-surface-variant mt-1 font-medium">
+                <p className="mt-1.5 text-base font-medium leading-snug text-on-surface-variant">
                   {position}
                 </p>
               </div>
@@ -70,7 +62,7 @@ export default function WelcomeSection() {
           <div className="flex-1 min-w-0">
             <div className="relative">
               {/* Large quote mark */}
-              <svg className="absolute -top-8 -left-4 w-16 h-16 text-primary/10" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="absolute -top-8 -left-4 w-16 h-16 text-primary/10" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zm-14.017 0v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H0z"/>
               </svg>
 

@@ -4,8 +4,10 @@ import NewsFilters from '../components/news/NewsFilters';
 import FeaturedNews from '../components/news/FeaturedNews';
 import NewsGrid from '../components/news/NewsGrid';
 import Pagination from '../components/news/Pagination';
-import { useNews } from '../hooks/useNews';
+import { useNews, useNewsCategories } from '../hooks/useNews';
 import { NEWS_CATEGORIES, NEWS_CATEGORY_ALL, newsCategoryMatches } from '../constants/categories';
+import SEOHead from '../components/SEOHead';
+import { generateBreadcrumbSchema, pageSEO } from '../utils/seoConfig';
 
 export default function NewsPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -15,15 +17,24 @@ export default function NewsPage() {
   const itemsPerPage = 6;
   
   const { data: newsData = [], isLoading } = useNews();
+  const { data: newsCategories = NEWS_CATEGORIES } = useNewsCategories();
 
   const categories = [
     NEWS_CATEGORY_ALL,
-    ...NEWS_CATEGORIES,
+    ...newsCategories,
+  ];
+  const seoSchemas = [
+    generateBreadcrumbSchema([
+      { name: 'Beranda', url: '/' },
+      { name: 'Berita', url: '/news' },
+    ]),
   ];
 
   if (isLoading) {
     return (
       <main className="flex-grow pb-16 w-full flex items-center justify-center min-h-[50vh]">
+        <SEOHead {...pageSEO.news} schemas={seoSchemas} />
+        <h1 className="sr-only">Berita Pengadaan BPBJ Kota Semarang</h1>
         <p className="text-on-surface-variant">Memuat berita...</p>
       </main>
     );
@@ -57,8 +68,12 @@ export default function NewsPage() {
   );
 
   return (
-    <main className="flex-grow pb-16 w-full">
-      <div className="px-6 max-w-7xl mx-auto w-full">
+    <main className="w-full flex-grow bg-slate-50 pb-20">
+      <SEOHead
+        {...pageSEO.news}
+        schemas={seoSchemas}
+      />
+      <div className="mx-auto w-full max-w-7xl px-5 sm:px-6">
         <NewsHero />
         <NewsFilters 
           searchQuery={searchQuery} 
@@ -72,7 +87,15 @@ export default function NewsPage() {
         {searchQuery === '' && categoryFilter === NEWS_CATEGORY_ALL && currentPage === 1 && newsData.length > 0 && (
           <FeaturedNews newsData={newsData} />
         )}
-        <NewsGrid articles={paginatedNews} />
+        <section className="mt-10">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-xs font-black uppercase tracking-widest text-primary">Daftar Berita</p>
+              <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-950">Semua Berita</h2>
+            </div>
+          </div>
+          <NewsGrid articles={paginatedNews} />
+        </section>
         {totalPages > 1 && (
           <Pagination 
             currentPage={currentPage} 

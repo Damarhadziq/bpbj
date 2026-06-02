@@ -20,7 +20,27 @@ export const useUpdateContactStatus = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, status }) => contactsApi.updateStatus(id, status),
-    onSuccess: () => {
+    onSuccess: (updatedContact) => {
+      queryClient.setQueryData(['contacts'], (currentContacts = []) => (
+        currentContacts.map((contact) => (
+          contact.id === updatedContact.id ? { ...contact, ...updatedContact } : contact
+        ))
+      ));
+      queryClient.invalidateQueries({ queryKey: ['contacts'] });
+    },
+  });
+};
+
+export const useReplyContact = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }) => contactsApi.reply(id, data),
+    onSuccess: (updatedContact) => {
+      queryClient.setQueryData(['contacts'], (currentContacts = []) => (
+        currentContacts.map((contact) => (
+          contact.id === updatedContact.id ? { ...contact, ...updatedContact } : contact
+        ))
+      ));
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
     },
   });

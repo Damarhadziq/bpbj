@@ -9,6 +9,7 @@ import { hashPassword, verifyPassword } from '@better-auth/utils/password';
 import {
   validateAdminPasswordPayload,
   validateConfirmationText,
+  validateOwnProfilePayload,
   validateOwnPasswordPayload,
   validateRole,
   validateTextId,
@@ -17,16 +18,47 @@ import {
 
 const router = Router();
 
-// Require superadmin for all routes in this file
-router.use(verifyAuth, requireRole(['superadmin']));
+router.use(verifyAuth);
+
+// PUT update current admin profile
+router.put('/me/profile', async (req, res) => {
+  try {
+    const currentUser = (req as any).user;
+    const payload = validateOwnProfilePayload(req.body);
+    if (!payload.ok) return res.status(400).json({ error: payload.error });
+
+    const updated = await db.update(user)
+      .set({
+        name: payload.data.name,
+        image: payload.data.image || null,
+        updatedAt: new Date(),
+      })
+      .where(eq(user.id, currentUser.id))
+      .returning({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        image: user.image,
+        role: user.role,
+        updatedAt: user.updatedAt,
+      });
+
+    if (updated.length === 0) return res.status(404).json({ error: 'User not found' });
+    return res.json(updated[0]);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 // GET all users
-router.get('/', async (req, res) => {
+router.get('/', requireRole(['superadmin']), async (req, res) => {
   try {
     const allUsers = await db.select({
       id: user.id,
       name: user.name,
       email: user.email,
+      image: user.image,
       role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
@@ -40,7 +72,7 @@ router.get('/', async (req, res) => {
 });
 
 // POST create new admin user
-router.post('/', async (req, res) => {
+router.post('/', requireRole(['superadmin']), async (req, res) => {
   try {
     const payload = validateUserCreatePayload(req.body);
     if (!payload.ok) return res.status(400).json({ error: payload.error });
@@ -67,6 +99,7 @@ router.post('/', async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
+        image: user.image,
         role: user.role,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
@@ -82,7 +115,7 @@ router.post('/', async (req, res) => {
 });
 
 // PUT update role
-router.put('/:id/role', async (req, res) => {
+router.put('/:id/role', requireRole(['superadmin']), async (req, res) => {
   try {
     const id = validateTextId(req.params.id);
     if (!id.ok) return res.status(400).json({ error: id.error });
@@ -103,7 +136,7 @@ router.put('/:id/role', async (req, res) => {
   }
 });
 
-// PUT change current superadmin password
+// PUT change current admin password
 router.put('/me/password', async (req, res) => {
   try {
     const currentUser = (req as any).user;
@@ -138,6 +171,9 @@ router.put('/me/password', async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+// Require superadmin for account management routes below
+router.use(requireRole(['superadmin']));
 
 // PUT change user password
 router.put('/:id/password', async (req, res) => {

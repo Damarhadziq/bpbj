@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import { NEWS_CATEGORIES, getNewsCategory } from '../../../constants/categories';
+import { useNewsCategories } from '../../../hooks/useNews';
 
 export default function CategoryNewsChart({ news = [] }) {
   const [hoveredIdx, setHoveredIdx] = useState(null);
   const [animate, setAnimate] = useState(false);
+  const { data: newsCategories = NEWS_CATEGORIES } = useNewsCategories();
 
   // Group and count news by category
   const categoryData = (() => {
     // Initialize standard categories
     const counts = {};
-    NEWS_CATEGORIES.forEach(cat => {
+    newsCategories.forEach(cat => {
       counts[cat] = 0;
     });
 
@@ -24,19 +26,19 @@ export default function CategoryNewsChart({ news = [] }) {
     // Check if we have no real data, if so, load beautiful fallback baselines
     if (realCount === 0) {
       const fallbacks = {
-        'Pengumuman': 14,
+        'Informasi': 14,
         'Kegiatan': 9,
         'Layanan': 6,
-        'Tender': 22,
+        'Sosialisasi': 22,
         'Market Sounding': 4
       };
-      return NEWS_CATEGORIES.map(cat => ({
+      return newsCategories.map(cat => ({
         category: cat,
         count: fallbacks[cat] || 0
       })).sort((a, b) => b.count - a.count);
     }
 
-    return NEWS_CATEGORIES.map(cat => ({
+    return newsCategories.map(cat => ({
       category: cat,
       count: counts[cat] || 0
     })).sort((a, b) => b.count - a.count);
@@ -54,20 +56,20 @@ export default function CategoryNewsChart({ news = [] }) {
   // Icon selector helper
   const getCategoryIcon = (category) => {
     switch (category) {
-      case 'Pengumuman': return 'campaign';
+      case 'Informasi': return 'campaign';
       case 'Kegiatan': return 'event_note';
       case 'Layanan': return 'construction';
-      case 'Tender': return 'gavel';
+      case 'Sosialisasi': return 'groups';
       case 'Market Sounding': return 'volume_up';
       default: return 'article';
     }
   };
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col h-full">
+    <div className="flex h-full flex-col rounded-lg border border-[#ececec] bg-white p-6">
       <div className="mb-4">
-        <h3 className="text-lg font-bold text-slate-800">Distribusi Kategori Berita</h3>
-        <p className="text-xs text-slate-400 font-medium">Perbandingan jumlah artikel per kategori pengumuman & berita</p>
+        <h3 className="text-lg font-semibold text-slate-900">Distribusi Kategori Berita</h3>
+        <p className="text-xs text-slate-500 font-normal">Perbandingan jumlah artikel per kategori pengumuman & berita</p>
       </div>
 
       <div className="flex-1 flex flex-col justify-center space-y-4">
@@ -79,17 +81,17 @@ export default function CategoryNewsChart({ news = [] }) {
           return (
             <div 
               key={idx}
-              className={`group flex items-center gap-4 transition-all duration-200 py-1.5 px-2.5 rounded-xl border border-transparent ${
+              className={`group flex items-center gap-4 rounded-lg border border-transparent px-2.5 py-1.5 transition-colors duration-200 ${
                 isHovered 
-                  ? 'bg-slate-50 border-slate-100 scale-[1.02] shadow-sm' 
+                  ? 'bg-slate-50 border-slate-100' 
                   : 'hover:bg-slate-50/50'
               }`}
               onMouseEnter={() => setHoveredIdx(idx)}
               onMouseLeave={() => setHoveredIdx(null)}
             >
               {/* Category Icon */}
-              <div className={`p-2 rounded-xl transition-colors duration-200 ${
-                isHovered ? 'bg-rose-100 text-rose-700' : 'bg-slate-50 text-slate-500'
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors duration-200 ${
+                isHovered ? 'bg-slate-200 text-slate-800' : 'bg-white text-slate-600'
               }`}>
                 <span className="material-symbols-outlined text-[20px] block">
                   {getCategoryIcon(data.category)}
@@ -98,9 +100,9 @@ export default function CategoryNewsChart({ news = [] }) {
 
               {/* Progress and Details */}
               <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-center mb-1.5 text-xs font-bold">
+                <div className="flex justify-between items-center mb-1.5 text-xs font-medium">
                   <span className="text-slate-700 truncate">{data.category}</span>
-                  <span className="text-slate-400 font-black">{percentage}%</span>
+                  <span className="text-slate-400 font-medium">{percentage}%</span>
                 </div>
                 
                 {/* Progress Bar Container */}
@@ -122,12 +124,12 @@ export default function CategoryNewsChart({ news = [] }) {
 
               {/* Numerical Badge */}
               <div className="text-right flex flex-col justify-center">
-                <span className={`text-base font-black transition-colors duration-200 ${
+                <span className={`text-base font-semibold transition-colors duration-200 ${
                   isHovered ? 'text-rose-700' : 'text-slate-800'
                 }`}>
                   {data.count}
                 </span>
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Artikel</span>
+                <span className="text-[9px] font-medium text-slate-400 uppercase tracking-wide">Artikel</span>
               </div>
             </div>
           );
@@ -135,9 +137,9 @@ export default function CategoryNewsChart({ news = [] }) {
       </div>
       
       {/* Dynamic Summary Card */}
-      <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-[11px] font-bold text-slate-400">
+      <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-[11px] font-medium text-slate-400">
         <span>TOTAL ARTIKEL</span>
-        <span className="text-slate-700 font-black px-2 py-0.5 bg-slate-50 border border-slate-100 rounded-md">
+        <span className="text-slate-700 font-medium px-2 py-0.5 bg-slate-50 border border-slate-100 rounded-md">
           {totalNewsCount} Berita
         </span>
       </div>

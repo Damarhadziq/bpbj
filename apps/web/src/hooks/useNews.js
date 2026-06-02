@@ -1,10 +1,21 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { newsApi } from '../services/newsApi';
+import { NEWS_CATEGORIES } from '../constants/categories';
 
 export const useNews = (options = {}) => {
   return useQuery({
     queryKey: ['news'],
     queryFn: newsApi.getAll,
+    ...options,
+  });
+};
+
+export const useNewsCategories = (options = {}) => {
+  return useQuery({
+    queryKey: ['news-categories'],
+    queryFn: newsApi.getCategories,
+    initialData: NEWS_CATEGORIES,
+    staleTime: 5 * 60 * 1000,
     ...options,
   });
 };

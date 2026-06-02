@@ -1,5 +1,13 @@
 import { useState } from 'react';
 import { useCreateContact } from '../../hooks/useContacts';
+import CustomSelect from '../ui/CustomSelect';
+
+const SUBJECT_OPTIONS = [
+  'Pertanyaan Umum',
+  'Aspirasi Pembangunan',
+  'Laporan Pengaduan',
+  'Informasi Lelang / Tender',
+];
 
 export default function ContactForm() {
   const createContact = useCreateContact();
@@ -28,8 +36,11 @@ export default function ContactForm() {
     setStatus('sent');
   };
 
+  const fieldClassName = 'h-11 w-full rounded-lg border border-slate-200 bg-white px-3.5 text-sm font-normal text-slate-800 outline-none transition-all placeholder:text-slate-400 focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/10';
+  const labelClassName = 'text-sm font-medium text-slate-700';
+
   return (
-    <div className="lg:col-span-8 bg-surface-container-low p-8 md:p-12 shadow-sm">
+    <div className="lg:col-span-8 bg-white p-8 md:p-12">
       <div className="mb-10">
         <div className="w-12 h-1 bg-primary mb-6"></div>
         <h2 className="text-3xl font-extrabold tracking-tight text-on-surface mb-4">Kirim Aspirasi &amp; Pertanyaan</h2>
@@ -39,9 +50,9 @@ export default function ContactForm() {
       </div>
       <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Nama Lengkap</label>
+          <label className={labelClassName}>Nama Lengkap</label>
           <input
-            className="w-full bg-surface-container-high border-none border-b-2 border-outline-variant focus:border-primary focus:ring-0 px-4 py-3 text-on-surface transition-all outline-none"
+            className={fieldClassName}
             placeholder="Masukkan nama Anda"
             type="text"
             value={formData.name}
@@ -50,9 +61,9 @@ export default function ContactForm() {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Alamat Email</label>
+          <label className={labelClassName}>Alamat Email</label>
           <input
-            className="w-full bg-surface-container-high border-none border-b-2 border-outline-variant focus:border-primary focus:ring-0 px-4 py-3 text-on-surface transition-all outline-none"
+            className={fieldClassName}
             placeholder="contoh@mail.com"
             type="email"
             value={formData.email}
@@ -61,22 +72,18 @@ export default function ContactForm() {
           />
         </div>
         <div className="space-y-2 md:col-span-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Subjek / Kategori</label>
-          <select
-            className="w-full bg-surface-container-high border-none border-b-2 border-outline-variant focus:border-primary focus:ring-0 px-4 py-3 text-on-surface transition-all outline-none"
+          <label className={labelClassName}>Subjek / Kategori</label>
+          <CustomSelect
             value={formData.subject}
-            onChange={handleChange('subject')}
-          >
-            <option>Pertanyaan Umum</option>
-            <option>Aspirasi Pembangunan</option>
-            <option>Laporan Pengaduan</option>
-            <option>Informasi Lelang / Tender</option>
-          </select>
+            onChange={(subject) => setFormData((current) => ({ ...current, subject }))}
+            options={SUBJECT_OPTIONS}
+            buttonClassName="h-11 rounded-lg border-slate-200 bg-white px-3.5 py-2.5 text-sm font-normal shadow-none focus-visible:ring-4"
+          />
         </div>
         <div className="space-y-2 md:col-span-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Pesan Anda</label>
+          <label className={labelClassName}>Pesan Anda</label>
           <textarea
-            className="w-full bg-surface-container-high border-none border-b-2 border-outline-variant focus:border-primary focus:ring-0 px-4 py-3 text-on-surface transition-all resize-none outline-none"
+            className="w-full resize-none rounded-lg border border-slate-200 bg-white px-3.5 py-3 text-sm font-normal leading-6 text-slate-800 outline-none transition-all placeholder:text-slate-400 focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/10"
             placeholder="Tuliskan pesan Anda di sini..."
             rows={6}
             value={formData.message}

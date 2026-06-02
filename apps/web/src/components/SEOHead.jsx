@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { seoConfig } from '../utils/seoConfig';
 
 /**
- * SEOHead — Dynamic SEO metadata component
+ * SEOHead - Dynamic SEO metadata component
  * Sets document title, meta tags, Open Graph, Twitter Card, canonical, and JSON-LD
  * Uses direct DOM manipulation (no external dependencies)
  */
@@ -15,7 +15,7 @@ export default function SEOHead({
   schemas = [],
   noindex = false,
 }) {
-  const fullTitle = title || `${seoConfig.siteName} — Portal Pengadaan Barang dan Jasa`;
+  const fullTitle = title || `${seoConfig.siteName} - Portal Pengadaan Barang dan Jasa`;
   const fullDescription = description || seoConfig.defaultDescription;
   const canonicalUrl = `${seoConfig.baseUrl}${path}`;
   const ogImage = image || seoConfig.defaultImage;

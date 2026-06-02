@@ -2,7 +2,7 @@ export default function ContactHero() {
   return (
     <section className="relative bg-primary-container pt-32 pb-24 overflow-hidden">
       <div className="absolute inset-0 opacity-10">
-        <img className="w-full h-full object-cover" data-alt="Modern government building architectural detail with sharp angles and glass facade under bright sunlight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQD5Z59Tt_vLQMl81KRTUyWQ2MudYGHwuAKhW8YFDJfdOvBIz1e6PGGAsdI_E5hcKNPwXTfmPeoeBG8bzwtCUT0v1Oc_dPCKQlZHDBNreojIbuQM7cRT40KnvUh9-c_WDVtAbASMTkX8aGIHnIkVHsgm1IG_WAB2Ih_Ob1wCpwynQPRDGQBZVG62m4tlErKBrmjoKNLy7r_3Db46QHTPUq9INplWXwWv2H2tkxfaKQU3mE72iSm5McuUEZjpU4sm7O3jVryR5fNQ"/>
+        <img className="w-full h-full object-cover" alt="Detail arsitektur gedung pemerintahan modern" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQD5Z59Tt_vLQMl81KRTUyWQ2MudYGHwuAKhW8YFDJfdOvBIz1e6PGGAsdI_E5hcKNPwXTfmPeoeBG8bzwtCUT0v1Oc_dPCKQlZHDBNreojIbuQM7cRT40KnvUh9-c_WDVtAbASMTkX8aGIHnIkVHsgm1IG_WAB2Ih_Ob1wCpwynQPRDGQBZVG62m4tlErKBrmjoKNLy7r_3Db46QHTPUq9INplWXwWv2H2tkxfaKQU3mE72iSm5McuUEZjpU4sm7O3jVryR5fNQ"/>
       </div>
       <div className="relative max-w-7xl mx-auto px-6">
         <div className="max-w-3xl">

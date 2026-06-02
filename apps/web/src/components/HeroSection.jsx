@@ -32,6 +32,7 @@ export default function HeroSection() {
   const activeSlides = slides.length > 0 ? slides : defaultSlides;
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const displaySlide = currentSlide % activeSlides.length;
 
   const goToSlide = useCallback((index) => {
     if (isTransitioning) return;
@@ -41,35 +42,23 @@ export default function HeroSection() {
   }, [isTransitioning]);
 
   const nextSlide = useCallback(() => {
-    goToSlide((currentSlide + 1) % activeSlides.length);
-  }, [activeSlides.length, currentSlide, goToSlide]);
+    goToSlide((displaySlide + 1) % activeSlides.length);
+  }, [activeSlides.length, displaySlide, goToSlide]);
 
   const prevSlide = useCallback(() => {
-    goToSlide((currentSlide - 1 + activeSlides.length) % activeSlides.length);
-  }, [activeSlides.length, currentSlide, goToSlide]);
+    goToSlide((displaySlide - 1 + activeSlides.length) % activeSlides.length);
+  }, [activeSlides.length, displaySlide, goToSlide]);
 
   useEffect(() => {
     const timer = setInterval(nextSlide, 5000);
     return () => clearInterval(timer);
   }, [nextSlide]);
 
-  useEffect(() => {
-    if (currentSlide >= activeSlides.length) {
-      setCurrentSlide(0);
-    }
-  }, [activeSlides.length, currentSlide]);
-
   return (
     <section id="hero-section" className="relative w-full pt-32 pb-20 px-6 min-h-[90vh] flex items-center bg-surface overflow-hidden">
-      {/* Decorative background blur */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl pointer-events-none" />
-      
       <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
         {/* Left Side: Text */}
         <div className="flex flex-col justify-center order-2 lg:order-1">
-          <span className="inline-block py-1 px-3 bg-primary/10 text-primary rounded text-sm font-bold tracking-widest uppercase mb-6 w-fit">
-            Portal Resmi Pengadaan
-          </span>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-on-surface tracking-tighter leading-tight mb-6">
             Transformasi Pengadaan, <br/>
             <span className="text-primary">Mewujudkan Semarang Hebat</span>
@@ -96,7 +85,7 @@ export default function HeroSection() {
                 <div
                   key={slide.id}
                   className={`absolute inset-0 transition-all duration-700 ease-in-out ${
-                    index === currentSlide
+                    index === displaySlide
                       ? 'opacity-100 scale-100'
                       : 'opacity-0 scale-105'
                   }`}
@@ -120,21 +109,13 @@ export default function HeroSection() {
                   key={index}
                   onClick={() => goToSlide(index)}
                   className={`transition-all duration-500 rounded-full ${
-                    index === currentSlide
+                    index === displaySlide
                       ? 'w-6 h-2 bg-white shadow-sm'
                       : 'w-2 h-2 bg-white/50 hover:bg-white/80'
                   }`}
                   aria-label={`Slide ${index + 1}`}
                 />
               ))}
-            </div>
-            
-            {/* Progress Bar inside carousel at bottom */}
-            <div className="absolute bottom-0 left-0 right-0 z-20 h-1 bg-white/20">
-              <div
-                className="h-full bg-white transition-all duration-300"
-                style={{ width: `${((currentSlide + 1) / activeSlides.length) * 100}%` }}
-              />
             </div>
           </div>
 

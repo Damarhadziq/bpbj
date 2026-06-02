@@ -31,8 +31,11 @@ import usersRouter from './routes/users';
 import carouselRouter from './routes/carousel';
 import analyticsRouter from './routes/analytics';
 import serviceLinksRouter from './routes/serviceLinks';
+import employeesRouter from './routes/employees';
+import authSessionRouter from './routes/authSession';
 
 // App routes
+app.use('/api/v1/auth', authSessionRouter);
 app.use('/api/v1/welcome-message', welcomeRouter);
 app.use('/api/v1/news', newsRouter);
 app.use('/api/v1/contacts', contactsRouter);
@@ -41,6 +44,7 @@ app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/carousel', carouselRouter);
 app.use('/api/v1/analytics', analyticsRouter);
 app.use('/api/v1/service-links', serviceLinksRouter);
+app.use('/api/v1/employees', employeesRouter);
 
 // Basic healthcheck
 app.get('/api/v1/health', (req, res) => {

@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import { db } from '../config/db';
 import { news } from '../db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { and, count, desc, eq, ne } from 'drizzle-orm';
 import { verifyAuth, requireRole } from '../middlewares/auth';
-import { validateNewsPayload, validateUuid } from '../utils/validation';
+import { NEWS_CATEGORIES, validateNewsPayload, validateUuid } from '../utils/validation';
 
 const router = Router();
+const MAX_SELECTED_NEWS = 5;
 
 const generateSummary = (content = '', maxLength = 180) => {
   const normalized = content.replace(/\s+/g, ' ').trim();
@@ -35,6 +36,11 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET news categories (Public)
+router.get('/categories', (req, res) => {
+  return res.json(NEWS_CATEGORIES);
+});
+
 // GET single news (Public)
 router.get('/:id', async (req, res) => {
   try {
@@ -56,6 +62,17 @@ router.post('/', verifyAuth, requireRole(['admin', 'superadmin']), async (req, r
     const user = (req as any).user;
     const payload = validateNewsPayload(req.body);
     if (!payload.ok) return res.status(400).json({ error: payload.error });
+
+    if (payload.data.isSelected && !payload.data.isFeatured) {
+      const selectedCount = await db.select({ value: count() }).from(news).where(eq(news.isSelected, true));
+      if ((selectedCount[0]?.value || 0) >= MAX_SELECTED_NEWS) {
+        return res.status(400).json({ error: `Berita pilihan maksimal ${MAX_SELECTED_NEWS} item.` });
+      }
+    }
+
+    if (payload.data.isFeatured) {
+      await db.update(news).set({ isFeatured: false, updatedAt: new Date() }).where(eq(news.isFeatured, true));
+    }
     
     const newArticle = await db.insert(news).values({
       title: payload.data.title,
@@ -65,6 +82,7 @@ router.post('/', verifyAuth, requireRole(['admin', 'superadmin']), async (req, r
       content: payload.data.content,
       imageUrl: payload.data.imageUrl,
       isFeatured: payload.data.isFeatured,
+      isSelected: payload.data.isFeatured ? false : payload.data.isSelected,
       date: payload.data.date,
       authorId: user.id
     }).returning();
@@ -83,6 +101,17 @@ router.put('/:id', verifyAuth, requireRole(['admin', 'superadmin']), async (req,
     if (!id.ok) return res.status(400).json({ error: id.error });
     const payload = validateNewsPayload(req.body);
     if (!payload.ok) return res.status(400).json({ error: payload.error });
+
+    if (payload.data.isSelected && !payload.data.isFeatured) {
+      const selectedCount = await db.select({ value: count() }).from(news).where(and(eq(news.isSelected, true), ne(news.id, id.data)));
+      if ((selectedCount[0]?.value || 0) >= MAX_SELECTED_NEWS) {
+        return res.status(400).json({ error: `Berita pilihan maksimal ${MAX_SELECTED_NEWS} item.` });
+      }
+    }
+
+    if (payload.data.isFeatured) {
+      await db.update(news).set({ isFeatured: false, updatedAt: new Date() }).where(and(eq(news.isFeatured, true), ne(news.id, id.data)));
+    }
     
     const updated = await db.update(news).set({
       title: payload.data.title,
@@ -92,6 +121,7 @@ router.put('/:id', verifyAuth, requireRole(['admin', 'superadmin']), async (req,
       content: payload.data.content,
       imageUrl: payload.data.imageUrl,
       isFeatured: payload.data.isFeatured,
+      isSelected: payload.data.isFeatured ? false : payload.data.isSelected,
       date: payload.data.date,
       updatedAt: new Date()
     }).where(eq(news.id, id.data)).returning();

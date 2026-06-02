@@ -8,18 +8,14 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
-    setIsMenuOpen(false);
-  }, [currentPath]);
-
-  useEffect(() => {
     document.body.style.overflow = isMenuOpen ? 'hidden' : '';
     return () => {
       document.body.style.overflow = '';
     };
   }, [isMenuOpen]);
 
-  const baseLinkClass = "transition-colors";
-  const activeLinkStyle = "text-red-700 dark:text-red-500 font-bold border-b-2 border-red-700 dark:border-red-500 pb-1";
+  const baseLinkClass = "font-medium transition-colors";
+  const activeLinkStyle = "text-red-700 dark:text-red-500 font-semibold";
   const inactiveLinkStyle = "text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400";
   const navItems = [
     { label: 'Beranda', path: '/' },
@@ -47,25 +43,8 @@ export default function Navbar() {
           ))}
         </div>
         
-        <div className="hidden md:flex items-center gap-4">
-          <Link
-            to="/admin/login"
-            className="bg-primary text-on-primary px-6 py-2 rounded-md font-bold hover:bg-primary-container transition-all active:scale-95 duration-200"
-          >
-            Masuk
-          </Link>
-        </div>
-        
         {/* Mobile Menu Icon */}
         <div className="md:hidden flex items-center gap-4">
-          <Link
-            to="/admin/login"
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-all active:scale-95 duration-200"
-            title="Masuk"
-            aria-label="Masuk"
-          >
-            <span className="material-symbols-outlined text-primary">login</span>
-          </Link>
           <button
             type="button"
             onClick={() => setIsMenuOpen((open) => !open)}
@@ -92,6 +71,7 @@ export default function Navbar() {
             <Link
               key={item.path}
               to={item.path}
+              onClick={() => setIsMenuOpen(false)}
               className={`flex items-center justify-between rounded-xl px-4 py-3 text-base font-semibold transition-colors ${
                 currentPath === item.path
                   ? 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300'
@@ -102,13 +82,6 @@ export default function Navbar() {
               <span className="material-symbols-outlined text-[18px]">chevron_right</span>
             </Link>
           ))}
-          <Link
-            to="/admin/login"
-            className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-bold text-on-primary transition-colors hover:bg-primary-container"
-          >
-            <span className="material-symbols-outlined text-[18px]">login</span>
-            Masuk Admin
-          </Link>
         </div>
       </div>
     </nav>

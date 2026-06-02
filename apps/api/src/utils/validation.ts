@@ -11,6 +11,7 @@ export type NewsPayload = {
   content: string;
   imageUrl: string;
   isFeatured: boolean;
+  isSelected: boolean;
   date: Date;
 };
 
@@ -39,6 +40,11 @@ export type ContactPayload = {
   message: string;
 };
 
+export type ContactReplyPayload = {
+  replySubject: string;
+  replyMessage: string;
+};
+
 export type CarouselPayload = {
   imageUrl: string;
   imageAlt?: string;
@@ -52,6 +58,16 @@ export type ServiceLinkPayload = {
   displayOrder: number;
 };
 
+export type EmployeePayload = {
+  name: string;
+  position: string;
+  quote: string | null;
+  imageUrl: string;
+  imageAlt?: string;
+  displayOrder: number;
+  isActive: boolean;
+};
+
 export type WelcomePayload = {
   name: string;
   position: string;
@@ -63,6 +79,11 @@ export type UserCreatePayload = {
   name: string;
   email: string;
   password: string;
+};
+
+export type OwnProfilePayload = {
+  name: string;
+  image?: string;
 };
 
 export type OwnPasswordPayload = {
@@ -81,7 +102,20 @@ const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const maxImageLength = 10 * 1024 * 1024;
+const maxEmployeeQuoteWords = 20;
 const externalUrlPattern = /^https?:\/\/[^\s/$.?#].[^\s]*$/i;
+export const NEWS_CATEGORIES = ['Informasi', 'Kegiatan', 'Layanan', 'Sosialisasi', 'Market Sounding'] as const;
+
+const normalizeCategory = (category = '') => category.trim().toLowerCase();
+const newsCategoryAliases: Record<string, typeof NEWS_CATEGORIES[number]> = {
+  informasi: 'Informasi',
+  pengumuman: 'Informasi',
+  kegiatan: 'Kegiatan',
+  layanan: 'Layanan',
+  sosialisasi: 'Sosialisasi',
+  tender: 'Sosialisasi',
+  'market sounding': 'Market Sounding',
+};
 
 const invalid = <T>(error: string): ValidationResult<T> => ({ ok: false, error });
 const valid = <T>(data: T): ValidationResult<T> => ({ ok: true, data });
@@ -153,6 +187,16 @@ const integerField = (body: RecordBody, field: string, defaultValue: number): Va
   return valid(numberValue);
 };
 
+const wordCount = (value: string) => value.trim().split(/\s+/).filter(Boolean).length;
+
+export const normalizeNewsCategory = (category: string): ValidationResult<string> => {
+  const normalized = newsCategoryAliases[normalizeCategory(category)];
+  if (!normalized) {
+    return invalid(`category must be one of: ${NEWS_CATEGORIES.join(', ')}`);
+  }
+  return valid(normalized);
+};
+
 export const validateUuid = (value: unknown, field = 'id'): ValidationResult<string> => {
   if (typeof value !== 'string' || !uuidPattern.test(value)) {
     return invalid(`${field} must be a valid UUID`);
@@ -178,16 +222,20 @@ export const validateNewsPayload = (input: unknown): ValidationResult<NewsPayloa
   if (!slugPattern.test(slug.data)) return invalid('slug must contain lowercase letters, numbers, and hyphens only');
   const category = requiredString(body.data, 'category', 50);
   if (!category.ok) return category;
+  const normalizedCategory = normalizeNewsCategory(category.data);
+  if (!normalizedCategory.ok) return normalizedCategory;
   const content = requiredString(body.data, 'content', 20000);
   if (!content.ok) return content;
-  const imageUrl = requiredString(body.data, 'imageUrl', 2048);
+  const imageUrl = requiredString(body.data, 'imageUrl', maxImageLength);
   if (!imageUrl.ok) return imageUrl;
   const isFeatured = optionalBoolean(body.data, 'isFeatured', false);
   if (!isFeatured.ok) return isFeatured;
+  const isSelected = optionalBoolean(body.data, 'isSelected', false);
+  if (!isSelected.ok) return isSelected;
   const date = requiredDate(body.data, 'date');
   if (!date.ok) return date;
 
-  return valid({ title: title.data, slug: slug.data, category: category.data, content: content.data, imageUrl: imageUrl.data, isFeatured: isFeatured.data, date: date.data });
+  return valid({ title: title.data, slug: slug.data, category: normalizedCategory.data, content: content.data, imageUrl: imageUrl.data, isFeatured: isFeatured.data, isSelected: isSelected.data, date: date.data });
 };
 
 export const validateGalleryPayload = (input: unknown): ValidationResult<GalleryPayload> => {
@@ -305,6 +353,18 @@ export const validateContactStatus = (input: unknown): ValidationResult<'UNREAD'
   return valid(status);
 };
 
+export const validateContactReplyPayload = (input: unknown): ValidationResult<ContactReplyPayload> => {
+  const body = getBody(input);
+  if (!body.ok) return body;
+
+  const replySubject = requiredString(body.data, 'replySubject', 255);
+  if (!replySubject.ok) return replySubject;
+  const replyMessage = requiredString(body.data, 'replyMessage', 10000);
+  if (!replyMessage.ok) return replyMessage;
+
+  return valid({ replySubject: replySubject.data, replyMessage: replyMessage.data });
+};
+
 export const validateConfirmationText = (input: unknown): ValidationResult<string> => {
   const body = getBody(input);
   if (!body.ok) return body;
@@ -355,6 +415,39 @@ export const validateServiceLinkPayload = (input: unknown): ValidationResult<Ser
   return valid({ imageUrl: imageUrl.data, linkUrl: linkUrl.data, displayOrder: displayOrder.data });
 };
 
+export const validateEmployeePayload = (input: unknown): ValidationResult<EmployeePayload> => {
+  const body = getBody(input);
+  if (!body.ok) return body;
+
+  const name = requiredString(body.data, 'name', 255);
+  if (!name.ok) return name;
+  const position = requiredString(body.data, 'position', 255);
+  if (!position.ok) return position;
+  const quote = optionalString(body.data, 'quote', 180);
+  if (!quote.ok) return quote;
+  if (quote.data && wordCount(quote.data) > maxEmployeeQuoteWords) {
+    return invalid(`quote must be ${maxEmployeeQuoteWords} words or fewer`);
+  }
+  const imageUrl = requiredString(body.data, 'imageUrl', maxImageLength);
+  if (!imageUrl.ok) return imageUrl;
+  const imageAlt = optionalString(body.data, 'imageAlt', 255);
+  if (!imageAlt.ok) return imageAlt;
+  const displayOrder = integerField(body.data, 'displayOrder', 0);
+  if (!displayOrder.ok) return displayOrder;
+  const isActive = optionalBoolean(body.data, 'isActive', true);
+  if (!isActive.ok) return isActive;
+
+  return valid({
+    name: name.data,
+    position: position.data,
+    quote: quote.data || null,
+    imageUrl: imageUrl.data,
+    imageAlt: imageAlt.data,
+    displayOrder: displayOrder.data,
+    isActive: isActive.data,
+  });
+};
+
 export const validateWelcomePayload = (input: unknown): ValidationResult<WelcomePayload> => {
   const body = getBody(input);
   if (!body.ok) return body;
@@ -385,6 +478,18 @@ export const validateUserCreatePayload = (input: unknown): ValidationResult<User
   if (password.data.length < 8) return invalid('Password must be at least 8 characters');
 
   return valid({ name: name.data, email: email.data.toLowerCase(), password: password.data });
+};
+
+export const validateOwnProfilePayload = (input: unknown): ValidationResult<OwnProfilePayload> => {
+  const body = getBody(input);
+  if (!body.ok) return body;
+
+  const name = requiredString(body.data, 'name', 255);
+  if (!name.ok) return name;
+  const image = optionalString(body.data, 'image', maxImageLength);
+  if (!image.ok) return image;
+
+  return valid({ name: name.data, image: image.data });
 };
 
 export const validateRole = (input: unknown): ValidationResult<'admin' | 'superadmin'> => {

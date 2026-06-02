@@ -3,6 +3,8 @@ import { useGallery } from '../hooks/useGallery';
 
 export default function GallerySection() {
   const { data: galleryData = [], isLoading } = useGallery();
+  const featuredGallery = galleryData.filter((item) => item.isFeatured);
+  const homepageGallery = (featuredGallery.length > 0 ? featuredGallery : galleryData).slice(0, 4);
 
   if (isLoading) {
     return (
@@ -24,7 +26,7 @@ export default function GallerySection() {
           <p className="text-on-surface-variant md:text-right max-w-md">Dokumentasi transparansi dan aksi nyata BPBJ Kota Semarang dalam melayani masyarakat.</p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {galleryData.slice(0, 4).map((item, idx) => (
+          {homepageGallery.map((item, idx) => (
             <Link to={`/gallery/${item.id}`} key={item.id} className={`aspect-square rounded-xl overflow-hidden group relative block ${idx % 2 !== 0 ? 'md:mt-8' : ''}`}>
               <img className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
                    src={item.imageUrl || 'https://via.placeholder.com/600x600'} alt={item.imageAlt || item.title}/>

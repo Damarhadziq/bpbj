@@ -11,3 +11,138 @@
 body {
   font-family: 'Inter', sans-serif;
 }
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(203 213 225) transparent;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb {
+  background: rgb(203 213 225);
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover {
+  background: rgb(148 163 184);
+  background-clip: padding-box;
+}
+
+@layer utilities {
+  .admin-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(203 213 225) transparent;
+  }
+
+  .admin-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .admin-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .admin-scrollbar::-webkit-scrollbar-thumb {
+    background: rgb(203 213 225);
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background-clip: padding-box;
+  }
+
+  .admin-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgb(148 163 184);
+    background-clip: padding-box;
+  }
+
+  .admin-drawer-open .admin-main-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .admin-drawer-open .admin-main-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .admin-drawer-overlay {
+    animation: adminOverlayFade 160ms ease-out;
+  }
+
+  .admin-drawer-panel {
+    animation: adminDrawerMoveIn 240ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+
+  .admin-drawer-overlay-closing {
+    animation: adminOverlayFadeOut 180ms ease-in forwards;
+  }
+
+  .admin-drawer-panel-closing {
+    animation: adminDrawerMoveOut 220ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  }
+}
+
+@keyframes adminOverlayFade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes adminSelectOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes adminDrawerMoveIn {
+  from {
+    transform: translateX(28px);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes adminOverlayFadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes adminDrawerMoveOut {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(32px);
+  }
+}

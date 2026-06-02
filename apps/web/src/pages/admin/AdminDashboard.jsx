@@ -4,6 +4,7 @@ import { useGallery } from '../../hooks/useGallery';
 import { useNews } from '../../hooks/useNews';
 import { useUsers } from '../../hooks/useUsers';
 import { useCarousel } from '../../hooks/useCarousel';
+import { useEmployees } from '../../hooks/useEmployees';
 import PublicationTrendChart from '../../components/admin/charts/PublicationTrendChart';
 import CategoryNewsChart from '../../components/admin/charts/CategoryNewsChart';
 import VisitorAnalyticsChart from '../../components/admin/charts/VisitorAnalyticsChart';
@@ -16,43 +17,54 @@ export default function AdminDashboard() {
   const { data: contacts = [] } = useContacts();
   const { data: users = [] } = useUsers({ enabled: isSuperadmin });
   const { data: carousel = [] } = useCarousel();
+  const { data: employees = [] } = useEmployees();
   const unreadContacts = contacts.filter((contact) => contact.status === 'UNREAD').length;
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-        <h1 className="text-2xl font-bold text-slate-800 mb-2">
-          Selamat datang, {session?.user?.name}!
-        </h1>
-        <p className="text-slate-500">
-          Anda login sebagai <span className="font-semibold text-primary capitalize">{session?.user?.role}</span>.
-          Pilih menu di samping untuk mulai mengelola konten website BPBJ Kota Semarang.
-        </p>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Dashboard</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
+            Ringkasan Pengelolaan Website
+          </h1>
+          <p className="mt-2 text-sm font-normal text-slate-500">
+            Halo, <span className="font-medium text-slate-700">{session?.user?.name}</span>. Anda login sebagai <span className="font-medium capitalize text-primary">{session?.user?.role}</span>.
+          </p>
+        </div>
+        <div className="w-fit text-right lg:text-left">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Mode Kerja</p>
+            <p className="text-sm font-semibold capitalize text-primary">{session?.user?.role || 'admin'}</p>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6">
-        {/* Placeholder Stat Cards */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-6">
         {[
-          { label: 'Total Berita', value: news.length, icon: 'article', color: 'bg-blue-50 text-blue-600' },
-          { label: 'Galeri Foto', value: gallery.length, icon: 'photo_library', color: 'bg-emerald-50 text-emerald-600' },
-          { label: 'Pesan Baru', value: unreadContacts, icon: 'mail', color: 'bg-amber-50 text-amber-600' },
-          { label: 'Admin Aktif', value: isSuperadmin ? users.length : '-', icon: 'shadow', color: 'bg-purple-50 text-purple-600' },
-          { label: 'Carousel Aktif', value: carousel.filter((item) => item.isActive).length, icon: 'view_carousel', color: 'bg-rose-50 text-rose-600' },
+          { label: 'Total Berita', value: news.length, icon: 'article' },
+          { label: 'Galeri Foto', value: gallery.length, icon: 'photo_library' },
+          { label: 'Pesan Baru', value: unreadContacts, icon: 'mail' },
+          { label: 'Admin Aktif', value: isSuperadmin ? users.length : '-', icon: 'shadow' },
+          { label: 'Carousel Aktif', value: carousel.filter((item) => item.isActive).length, icon: 'view_carousel' },
+          { label: 'Pegawai Tampil', value: employees.filter((item) => item.isActive).length, icon: 'badge' },
         ].map((stat, idx) => (
-          <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-start gap-4">
-            <div className={`p-3 rounded-xl ${stat.color}`}>
-              <span className="material-symbols-outlined">{stat.icon === 'shadow' ? 'shield_person' : stat.icon}</span>
-            </div>
-            <div>
-              <p className="text-3xl font-black text-slate-800">{stat.value}</p>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">{stat.label}</p>
+          <div key={idx} className="rounded-lg border border-[#ececec] bg-white p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-700">
+                <span className="material-symbols-outlined text-[21px]">{stat.icon === 'shadow' ? 'shield_person' : stat.icon}</span>
+              </div>
+              <div>
+                <p className="text-right text-3xl font-semibold tracking-tight text-slate-950">{stat.value}</p>
+                <p className="mt-1 text-right text-xs font-medium uppercase tracking-wide text-slate-400">{stat.label}</p>
+              </div>
             </div>
           </div>
         ))}
       </div>
       
       {/* Interactive Analytics Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-3">
         <div className="flex flex-col min-h-[360px]">
           <PublicationTrendChart news={news} gallery={gallery} />
         </div>
