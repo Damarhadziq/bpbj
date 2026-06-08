@@ -21,8 +21,8 @@ export default function ContactPage() {
         ]}
       />
       <ContactHero />
-      <section className="max-w-7xl mx-auto px-6 -mt-16 relative z-10 pb-24">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <section className="max-w-7xl mx-auto px-5 sm:px-6 -mt-10 md:-mt-16 relative z-10 pb-16 md:pb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 md:gap-8">
           <div className="lg:col-span-4 space-y-6">
             <ContactInfo />
             <MapCard />

@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
-import { useContacts, useUpdateContactStatus, useDeleteContact, useReplyContact } from '../../hooks/useContacts';
-import { AdminButton, AdminModal, AdminPageHeader, AdminSelect, AdminTableCard, AdminTextarea, AdminTextInput } from '../../components/admin/AdminUI';
+import { useEffect, useMemo, useState } from 'react';
+import { useContacts, useUpdateContactStatus, useDeleteContact, useDeleteContactReply, useReplyContact } from '../../hooks/useContacts';
+import { AdminButton, AdminConfirmDialog, AdminModal, AdminPageHeader, AdminSelect, AdminTableCard, AdminTextarea, AdminTextInput } from '../../components/admin/AdminUI';
 
 const CONTACT_STATUS_ALL = 'ALL';
 const CONTACT_SUBJECT_ALL = 'ALL_SUBJECTS';
@@ -30,17 +30,46 @@ const REPLY_TEMPLATES = [
   },
 ];
 
+const getPlainEmailAddress = (email) => {
+  const normalizedEmail = String(email || '').trim();
+  const bracketMatch = normalizedEmail.match(/<([^<>@\s]+@[^<>@\s]+)>/);
+
+  if (bracketMatch) return bracketMatch[1];
+
+  return normalizedEmail;
+};
+
+const buildMailtoUrl = ({ email, subject, message }) => {
+  const recipient = getPlainEmailAddress(email);
+  const encodedSubject = encodeURIComponent(subject);
+  const encodedBody = encodeURIComponent(message);
+
+  return `mailto:${encodeURIComponent(recipient)}?subject=${encodedSubject}&body=${encodedBody}`;
+};
+
+const buildReplyMessage = (templateBlocks, manualMessage) => {
+  const opening = templateBlocks.find((template) => template.label === 'Pembuka')?.text;
+  const closing = templateBlocks.find((template) => template.label === 'Penutup')?.text;
+
+  return [opening, manualMessage.trim(), closing].filter(Boolean).join('\n\n------------------------------\n\n');
+};
+
+const getReplySubject = (contact) => contact?.replySubject || `Re: ${contact?.subject || 'Pengaduan BPBJ Kota Semarang'}`;
+
 export default function AdminContacts() {
   const { data: contacts = [], isLoading } = useContacts();
   const updateStatusMutation = useUpdateContactStatus();
   const replyMutation = useReplyContact();
+  const deleteReplyMutation = useDeleteContactReply();
   const deleteMutation = useDeleteContact();
   const [detailItem, setDetailItem] = useState(null);
   const [deleteItem, setDeleteItem] = useState(null);
+  const [isDeleteReplyConfirmOpen, setIsDeleteReplyConfirmOpen] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [formError, setFormError] = useState('');
   const [replyError, setReplyError] = useState('');
   const [replyInfo, setReplyInfo] = useState('');
+  const [isReplyDetailOpen, setIsReplyDetailOpen] = useState(false);
   const [replyForm, setReplyForm] = useState({ replySubject: '', replyMessage: '' });
   const [replyTemplateBlocks, setReplyTemplateBlocks] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -49,6 +78,17 @@ export default function AdminContacts() {
   const [sortOrder, setSortOrder] = useState('newest');
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    if (!replyError && !replyInfo) return undefined;
+
+    const timer = setTimeout(() => {
+      setReplyError('');
+      setReplyInfo('');
+    }, 4500);
+
+    return () => clearTimeout(timer);
+  }, [replyError, replyInfo]);
 
   const handleStatusChange = async (id, newStatus) => {
     await updateStatusMutation.mutateAsync({ id, status: newStatus });
@@ -59,9 +99,10 @@ export default function AdminContacts() {
     setDetailItem(initialContact);
     setReplyError('');
     setReplyInfo('');
+    setIsReplyDetailOpen(false);
     setReplyForm({
-      replySubject: contact.replySubject || `Re: ${contact.subject || 'Pengaduan BPBJ Kota Semarang'}`,
-      replyMessage: contact.replyMessage || '',
+      replySubject: getReplySubject(contact),
+      replyMessage: '',
     });
     setReplyTemplateBlocks([]);
     if (contact.status === 'UNREAD') {
@@ -76,12 +117,16 @@ export default function AdminContacts() {
     setReplyInfo('');
 
     try {
-      const templateMessage = replyTemplateBlocks.map((template) => template.text).join('\n\n');
       const manualMessage = replyForm.replyMessage.trim();
-      const replyMessage = [templateMessage, manualMessage].filter(Boolean).join('\n\n');
+      const replyMessage = buildReplyMessage(replyTemplateBlocks, manualMessage);
 
       if (!replyMessage) {
         setReplyError('Isi balasan wajib diisi atau pilih template pembuka/penutup terlebih dahulu.');
+        return;
+      }
+
+      if (detailItem.replyMessage) {
+        setReplyError('Balasan tercatat hanya bisa ada satu. Hapus balasan lama terlebih dahulu sebelum membuat balasan baru.');
         return;
       }
 
@@ -89,14 +134,35 @@ export default function AdminContacts() {
         id: detailItem.id,
         data: { ...replyForm, replyMessage },
       });
+      window.location.href = buildMailtoUrl({
+        email: detailItem.email,
+        subject: replyForm.replySubject,
+        message: replyMessage,
+      });
       setDetailItem(updatedContact);
+      setIsReplyDetailOpen(false);
       setReplyTemplateBlocks([]);
-      setReplyForm({ replySubject: updatedContact.replySubject || replyForm.replySubject, replyMessage: updatedContact.replyMessage || '' });
-      setReplyInfo(updatedContact.emailSent
-        ? 'Balasan berhasil dikirim ke email pengadu dan tercatat di detail.'
-        : 'Balasan sudah tercatat. Email belum terkirim karena konfigurasi SMTP belum tersedia atau gagal tersambung.');
+      setReplyForm({ replySubject: getReplySubject(updatedContact), replyMessage: '' });
+      setReplyInfo('Balasan sudah tercatat. Aplikasi email dibuka dengan penerima, subjek, dan isi balasan yang sudah terisi.');
     } catch (error) {
       setReplyError(error.response?.data?.error || 'Balasan gagal diproses. Periksa isi balasan lalu coba lagi.');
+    }
+  };
+
+  const handleDeleteReply = async () => {
+    setReplyError('');
+    setReplyInfo('');
+
+    try {
+      const updatedContact = await deleteReplyMutation.mutateAsync(detailItem.id);
+      setIsDeleteReplyConfirmOpen(false);
+      setDetailItem(updatedContact);
+      setIsReplyDetailOpen(false);
+      setReplyTemplateBlocks([]);
+      setReplyForm({ replySubject: getReplySubject(updatedContact), replyMessage: '' });
+      setReplyInfo('Balasan tercatat sudah dihapus. Form balasan bisa digunakan kembali.');
+    } catch (error) {
+      setReplyError(error.response?.data?.error || 'Gagal menghapus balasan tercatat. Coba lagi sebentar.');
     }
   };
 
@@ -353,7 +419,15 @@ export default function AdminContacts() {
       )}
 
       {detailItem && (
-        <AdminModal eyebrow="Kotak Masuk" title="Detail Pengaduan" onClose={() => setDetailItem(null)} maxWidth="max-w-3xl">
+        <AdminModal
+          eyebrow="Kotak Masuk"
+          title="Detail Pengaduan"
+          onClose={() => {
+            setDetailItem(null);
+            setIsReplyDetailOpen(false);
+          }}
+          maxWidth="max-w-3xl"
+        >
             <div className="p-8 space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="rounded-lg bg-slate-50 p-4">
@@ -382,20 +456,78 @@ export default function AdminContacts() {
               {detailItem.replyMessage && (
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-2">Balasan Tercatat</p>
-                  <div className="rounded-lg border border-green-100 bg-green-50 p-5 text-slate-700">
-                    <p className="font-semibold text-slate-900">{detailItem.replySubject}</p>
-                    <p className="mt-3 whitespace-pre-wrap leading-relaxed">{detailItem.replyMessage}</p>
-                    <p className="mt-4 text-xs font-medium text-green-700">
-                      {detailItem.emailSentAt ? `Email terkirim pada ${formatDate(detailItem.emailSentAt)}` : 'Balasan tersimpan, email belum tercatat terkirim.'}
-                    </p>
+                  <div className="rounded-lg border border-slate-200 bg-white p-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-green-50 text-green-700">
+                          <span className="material-symbols-outlined text-[20px]">outgoing_mail</span>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate font-semibold text-slate-900">{detailItem.repliedByName || 'Admin BPBJ'}</p>
+                          <p className="text-sm text-slate-500">
+                            {detailItem.repliedAt ? formatDate(detailItem.repliedAt) : 'Waktu balasan belum tercatat'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                        <button
+                          type="button"
+                          onClick={() => setIsReplyDetailOpen((isOpen) => !isOpen)}
+                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">
+                            {isReplyDetailOpen ? 'visibility_off' : 'visibility'}
+                          </span>
+                          {isReplyDetailOpen ? 'Tutup detail' : 'Lihat detail'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsDeleteReplyConfirmOpen(true)}
+                          disabled={deleteReplyMutation.isPending}
+                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-red-100 bg-white px-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                          data-admin-ignore-dirty
+                        >
+                          {deleteReplyMutation.isPending ? (
+                            <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                          ) : (
+                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                          )}
+                          Hapus
+                        </button>
+                      </div>
+                    </div>
+                    {isReplyDetailOpen && (
+                      <div className="mt-4 space-y-4 rounded-lg border border-green-100 bg-green-50 p-4 text-slate-700">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                          <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-green-700">Dibalas oleh</p>
+                            <p className="mt-1 font-semibold text-slate-900">{detailItem.repliedByName || 'Admin BPBJ'}</p>
+                            {detailItem.repliedByEmail && <p className="text-sm text-slate-500 break-all">{detailItem.repliedByEmail}</p>}
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-green-700">Waktu balasan</p>
+                            <p className="mt-1 font-semibold text-slate-900">{detailItem.repliedAt ? formatDate(detailItem.repliedAt) : '-'}</p>
+                            {detailItem.repliedByRole && <p className="text-sm capitalize text-slate-500">{detailItem.repliedByRole}</p>}
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium uppercase tracking-wide text-green-700">Subjek balasan</p>
+                          <p className="mt-1 font-semibold text-slate-900">{detailItem.replySubject}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium uppercase tracking-wide text-green-700">Isi balasan</p>
+                          <p className="mt-2 whitespace-pre-wrap leading-relaxed">{detailItem.replyMessage}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
+              {!detailItem.replyMessage && (
               <form onSubmit={handleReplySubmit} className="space-y-4 rounded-lg border border-slate-200 bg-white p-5">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-primary">Balas Pengaduan</p>
-                  <p className="mt-1 text-sm text-slate-500">Balasan akan dicatat di detail dan dikirim ke email pengadu jika SMTP sudah dikonfigurasi.</p>
-                  <p className="mt-1 text-xs font-medium text-slate-400">Email pengirim mengikuti konfigurasi server: SMTP_FROM, atau SMTP_USER jika SMTP_FROM kosong.</p>
+                  <p className="text-xs font-medium uppercase tracking-wide text-primary">Template Balasan Email</p>
+                  <p className="mt-1 text-sm text-slate-500">Susun balasan dari template pembuka/penutup dan isi tambahan. Saat dikirim, aplikasi email akan terbuka dengan penerima, subjek, dan isi yang sudah terisi.</p>
                 </div>
                 {replyError && <div className="rounded-lg border border-red-100 bg-red-50 p-3 text-sm font-medium text-red-600">{replyError}</div>}
                 {replyInfo && <div className="rounded-lg border border-blue-100 bg-blue-50 p-3 text-sm font-medium text-blue-700">{replyInfo}</div>}
@@ -457,12 +589,33 @@ export default function AdminContacts() {
                 <div className="flex justify-end">
                   <AdminButton type="submit" disabled={replyMutation.isPending}>
                     {replyMutation.isPending && <span className="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>}
-                    Kirim Balasan
+                    Buka Email
                   </AdminButton>
                 </div>
               </form>
+              )}
+              {detailItem.replyMessage && (
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-500">
+                  Pengaduan ini sudah memiliki satu balasan tercatat. Hapus balasan tersebut jika perlu membatalkan atau menyusun ulang balasan.
+                </div>
+              )}
             </div>
         </AdminModal>
+      )}
+
+      {isDeleteReplyConfirmOpen && (
+        <AdminConfirmDialog
+          eyebrow="Batalkan Balasan"
+          title="Hapus Balasan Tercatat?"
+          description="Catatan balasan akan dihapus dari detail pengaduan. Setelah itu, pengaduan ini bisa dibalas kembali dari form admin."
+          confirmText="Hapus Balasan"
+          cancelText="Batal"
+          icon="outgoing_mail"
+          tone="red"
+          isLoading={deleteReplyMutation.isPending}
+          onCancel={() => setIsDeleteReplyConfirmOpen(false)}
+          onConfirm={handleDeleteReply}
+        />
       )}
 
       {deleteItem && (

@@ -3,6 +3,7 @@ import { db } from '../config/db';
 import { visits } from '../db/schema';
 import { sql } from 'drizzle-orm';
 import { validateAnalyticsVisit } from '../utils/validation';
+import { verifyAuth, requireRole } from '../middlewares/auth';
 
 const router = Router();
 
@@ -24,8 +25,8 @@ router.post('/visit', async (req, res) => {
   }
 });
 
-// GET aggregated visitor stats (Admin / Public)
-router.get('/stats', async (req, res) => {
+// GET aggregated visitor stats (Admin/Superadmin)
+router.get('/stats', verifyAuth, requireRole(['admin', 'superadmin']), async (req, res) => {
   try {
     // 1. Get total count
     const totalCountResult = await db.select({ count: sql<number>`count(*)` }).from(visits);

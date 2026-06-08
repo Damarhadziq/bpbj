@@ -103,7 +103,7 @@ export function AdminModal({ eyebrow, title, children, maxWidth = 'max-w-3xl', o
   return (
     <div className={`admin-drawer-overlay fixed inset-0 z-50 flex justify-end bg-slate-950/45 backdrop-blur-sm ${isClosing ? 'admin-drawer-overlay-closing' : ''}`} onClick={handleClose}>
       <div ref={panelRef} className={`admin-drawer-panel admin-scrollbar h-full w-full ${maxWidth} overflow-y-auto border-l border-slate-200 bg-white ${isClosing ? 'admin-drawer-panel-closing' : ''}`} onClick={(event) => event.stopPropagation()} onClickCapture={handlePanelClickCapture}>
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white/95 px-5 py-4 backdrop-blur sm:px-7">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white/95 px-5 py-4 backdrop-blur sm:px-7">
           <div>
             {eyebrow && <p className="text-xs font-semibold uppercase tracking-wide text-primary">{eyebrow}</p>}
             <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">{title}</h2>
@@ -144,7 +144,7 @@ export function AdminModal({ eyebrow, title, children, maxWidth = 'max-w-3xl', o
 
 export function AdminFormSection({ icon, title, description, children }) {
   return (
-    <div className="rounded-lg bg-slate-50 p-5">
+    <div className="rounded-lg border border-slate-200 bg-white p-5">
       <div className="mb-5 flex items-center gap-3">
         {icon && (
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
@@ -163,7 +163,7 @@ export function AdminFormSection({ icon, title, description, children }) {
 
 export function AdminModalActions({ children }) {
   return (
-    <div className="mt-8 flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
+    <div className="mt-8 flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
       {children}
     </div>
   );
@@ -190,7 +190,7 @@ export function AdminConfirmDialog({
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/45 px-4 backdrop-blur-sm" role="dialog" aria-modal="true">
       <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-950/10">
-        <div className="mb-5 flex items-start gap-3 border-b border-slate-100 pb-5">
+        <div className="mb-5 flex items-start gap-3 border-b border-slate-200 pb-5">
           <div className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg ${tones[tone] || tones.red}`}>
             <span className="material-symbols-outlined">{icon}</span>
           </div>

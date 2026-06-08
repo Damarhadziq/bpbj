@@ -4,6 +4,7 @@ const navItems = [
   { id: 'tentang-kami', label: 'Tentang Kami' },
   { id: 'visi-misi', label: 'Visi & Misi' },
   { id: 'tugas-fungsi', label: 'Tugas & Fungsi' },
+  { id: 'regulasi', label: 'Regulasi' },
   { id: 'struktur', label: 'Struktur Organisasi' },
   { id: 'pegawai', label: 'Pegawai BPBJ' }
 ];

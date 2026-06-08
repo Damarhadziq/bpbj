@@ -46,6 +46,21 @@ export const useReplyContact = () => {
   });
 };
 
+export const useDeleteContactReply = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => contactsApi.deleteReply(id),
+    onSuccess: (updatedContact) => {
+      queryClient.setQueryData(['contacts'], (currentContacts = []) => (
+        currentContacts.map((contact) => (
+          contact.id === updatedContact.id ? { ...contact, ...updatedContact } : contact
+        ))
+      ));
+      queryClient.invalidateQueries({ queryKey: ['contacts'] });
+    },
+  });
+};
+
 export const useDeleteContact = () => {
   const queryClient = useQueryClient();
   return useMutation({

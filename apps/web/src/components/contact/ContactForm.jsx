@@ -40,15 +40,15 @@ export default function ContactForm() {
   const labelClassName = 'text-sm font-medium text-slate-700';
 
   return (
-    <div className="lg:col-span-8 bg-white p-8 md:p-12">
-      <div className="mb-10">
-        <div className="w-12 h-1 bg-primary mb-6"></div>
-        <h2 className="text-3xl font-extrabold tracking-tight text-on-surface mb-4">Kirim Aspirasi &amp; Pertanyaan</h2>
+    <div className="scroll-mt-32 lg:col-span-8 bg-white p-5 md:p-12" id="pengaduan">
+      <div className="mb-7 md:mb-10">
+        <div className="hidden w-12 h-1 bg-primary mb-6 md:block"></div>
+        <h2 className="text-2xl font-bold tracking-tight text-on-surface mb-3 md:text-3xl md:font-extrabold md:mb-4">Kirim Aspirasi &amp; Pertanyaan</h2>
         <p className="text-on-surface-variant leading-relaxed">
           Kami menghargai setiap masukan Anda. Gunakan formulir di bawah ini untuk mengirimkan pertanyaan atau aspirasi terkait pengadaan barang dan jasa di lingkungan Pemerintah Kota Semarang.
         </p>
       </div>
-      <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
+      <form className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6" onSubmit={handleSubmit}>
         <div className="space-y-2">
           <label className={labelClassName}>Nama Lengkap</label>
           <input
@@ -98,12 +98,12 @@ export default function ContactForm() {
             </p>
           </div>
         )}
-        <div className="md:col-span-2 flex flex-col md:flex-row items-start md:items-center justify-between pt-4 gap-6">
+        <div className="md:col-span-2 flex flex-col md:flex-row items-start md:items-center justify-between pt-2 md:pt-4 gap-5 md:gap-6">
           <p className="text-[10px] text-on-surface-variant uppercase tracking-tighter max-w-xs font-medium">
             Dengan menekan tombol kirim, Anda menyetujui kebijakan privasi kami mengenai pengolahan data pribadi.
           </p>
           <button
-            className="bg-primary hover:bg-primary-container text-white px-10 py-4 font-black uppercase tracking-widest text-sm transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3 w-full md:w-auto disabled:opacity-60 disabled:cursor-not-allowed"
+            className="bg-primary hover:bg-primary-container text-white px-8 py-3.5 font-bold uppercase tracking-widest text-sm transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3 w-full md:w-auto md:px-10 md:py-4 md:font-black disabled:opacity-60 disabled:cursor-not-allowed"
             type="submit"
             disabled={createContact.isPending}
           >

@@ -1,7 +1,7 @@
 const SITE_NAME = 'BPBJ Kota Semarang';
 const BASE_URL = 'https://bpbj.semarangkota.go.id';
 const DEFAULT_OG_IMAGE = `${BASE_URL}/favicon.png`;
-const SITE_DESCRIPTION = 'Portal resmi Bagian Pengadaan Barang dan Jasa Sekretariat Daerah Kota Semarang. Informasi pengadaan, berita, galeri kegiatan, dan layanan kontak BPBJ Kota Semarang.';
+const SITE_DESCRIPTION = 'Website resmi Bagian Pengadaan Barang dan Jasa Sekretariat Daerah Kota Semarang. Informasi pengadaan, berita, galeri kegiatan, dan layanan kontak BPBJ Kota Semarang.';
 
 export const seoConfig = {
   siteName: SITE_NAME,
@@ -14,13 +14,13 @@ export const seoConfig = {
 
 export const pageSEO = {
   home: {
-    title: 'BPBJ Kota Semarang | Portal Pengadaan Barang dan Jasa',
-    description: 'Portal resmi BPBJ Kota Semarang untuk informasi pengadaan barang dan jasa, berita kegiatan, galeri dokumentasi, serta layanan kontak dan pengaduan.',
+    title: 'BPBJ Kota Semarang | Website Resmi Pengadaan Barang dan Jasa',
+    description: 'Website resmi BPBJ Kota Semarang untuk informasi pengadaan barang dan jasa, berita kegiatan, galeri dokumentasi, serta layanan kontak dan pengaduan.',
     path: '/',
   },
   profile: {
-    title: 'Profil BPBJ Kota Semarang | Visi, Misi, Tugas, dan Pegawai',
-    description: 'Kenali profil BPBJ Kota Semarang, visi dan misi, tugas dan fungsi, struktur organisasi, serta direktori pegawai aktif.',
+    title: 'Profil BPBJ Kota Semarang | Visi, Misi, Regulasi, dan Pegawai',
+    description: 'Kenali profil BPBJ Kota Semarang, visi dan misi, tugas dan fungsi, regulasi pengadaan barang/jasa, struktur organisasi, serta direktori pegawai aktif.',
     path: '/profile',
   },
   news: {

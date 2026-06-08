@@ -57,7 +57,8 @@ export default {
         "primary-fixed-dim": "#ffb4a8",
         "on-secondary-container": "#526772",
         "background": "#f8f9fa",
-        "on-tertiary": "#ffffff"
+        "on-tertiary": "#ffffff",
+        "admin-list": "#f8f9fb"
       },
       fontFamily: {
         "headline": ["Inter"],

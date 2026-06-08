@@ -13,15 +13,7 @@ const emptyForm = {
   isActive: true,
 };
 
-const MAX_EMPLOYEE_QUOTE_WORDS = 20;
 
-const countWords = (value) => String(value || '').trim().split(/\s+/).filter(Boolean).length;
-
-const limitWords = (value, maxWords) => {
-  const words = String(value || '').trim().split(/\s+/).filter(Boolean);
-  if (words.length <= maxWords) return value;
-  return words.slice(0, maxWords).join(' ');
-};
 
 const EMPLOYEE_POSITIONS = [
   'Kepala Bagian Pengadaan Barang/Jasa',
@@ -55,7 +47,7 @@ export default function AdminEmployees() {
   const normalizedSearch = searchTerm.trim().toLowerCase();
   const filteredEmployees = useMemo(() => employees.filter((item) => {
     if (!normalizedSearch) return true;
-    return [item.name, item.position, item.quote, item.imageAlt, item.displayOrder, item.isActive ? 'aktif' : 'nonaktif']
+    return [item.name, item.position, item.imageAlt, item.displayOrder, item.isActive ? 'aktif' : 'nonaktif']
       .some((value) => String(value || '').toLowerCase().includes(normalizedSearch));
   }), [employees, normalizedSearch]);
   const totalPages = pageSize === 'all' ? 1 : Math.max(1, Math.ceil(filteredEmployees.length / pageSize));
@@ -65,7 +57,6 @@ export default function AdminEmployees() {
     : filteredEmployees.slice((safeCurrentPage - 1) * pageSize, safeCurrentPage * pageSize);
   const firstItem = filteredEmployees.length === 0 || pageSize === 'all' ? (filteredEmployees.length ? 1 : 0) : ((safeCurrentPage - 1) * pageSize) + 1;
   const lastItem = pageSize === 'all' ? filteredEmployees.length : Math.min(safeCurrentPage * pageSize, filteredEmployees.length);
-  const quoteWordCount = countWords(formData.quote);
 
   const openCreateModal = () => {
     setEditingItem(null);
@@ -174,7 +165,6 @@ export default function AdminEmployees() {
               <tr className="border-b border-slate-200 bg-slate-50">
                 <th className="px-6 py-4 text-xs font-medium uppercase tracking-wide text-slate-500">Pegawai</th>
                 <th className="px-6 py-4 text-xs font-medium uppercase tracking-wide text-slate-500">Jabatan</th>
-                <th className="px-6 py-4 text-xs font-medium uppercase tracking-wide text-slate-500">Kata-kata Hover</th>
                 <th className="px-6 py-4 text-xs font-medium uppercase tracking-wide text-slate-500">Urutan</th>
                 <th className="px-6 py-4 text-xs font-medium uppercase tracking-wide text-slate-500">Status</th>
                 <th className="px-6 py-4 text-right text-xs font-medium uppercase tracking-wide text-slate-500">Aksi</th>
@@ -193,9 +183,6 @@ export default function AdminEmployees() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-slate-600">{item.position}</td>
-                  <td className="px-6 py-4 text-sm text-slate-500">
-                    <p className="max-w-xs line-clamp-2">{item.quote || 'Belum diisi'}</p>
-                  </td>
                   <td className="px-6 py-4 text-sm text-slate-500">{item.displayOrder}</td>
                   <td className="px-6 py-4">
                     <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${item.isActive ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
@@ -216,7 +203,7 @@ export default function AdminEmployees() {
               ))}
               {filteredEmployees.length === 0 && (
                 <tr>
-                  <td colSpan="6" className="px-6 py-16 text-center text-slate-400">
+                  <td colSpan="5" className="px-6 py-16 text-center text-slate-400">
                     {employees.length === 0 ? 'Belum ada data pegawai. Klik "Tambah Pegawai" untuk mulai.' : 'Tidak ada pegawai yang cocok dengan pencarian.'}
                   </td>
                 </tr>
@@ -300,20 +287,6 @@ export default function AdminEmployees() {
                           searchable
                           searchPlaceholder="Cari jabatan..."
                         />
-                      </AdminField>
-                    </div>
-                    <div className="mt-4">
-                      <AdminField label="Kata-kata Hover">
-                        <AdminTextarea
-                          rows={3}
-                          maxLength={180}
-                          value={formData.quote}
-                          onChange={(event) => setFormData({ ...formData, quote: limitWords(event.target.value, MAX_EMPLOYEE_QUOTE_WORDS) })}
-                          placeholder="Tulis kalimat singkat yang muncul saat kartu pegawai di-hover"
-                        />
-                        <p className="mt-1.5 text-xs font-medium text-slate-400">
-                          {quoteWordCount}/{MAX_EMPLOYEE_QUOTE_WORDS} kata. Kosongkan untuk memakai kata-kata otomatis.
-                        </p>
                       </AdminField>
                     </div>
                   </AdminFormSection>

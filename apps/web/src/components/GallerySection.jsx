@@ -19,13 +19,13 @@ export default function GallerySection() {
   }
 
   return (
-    <section className="py-24 bg-surface-container-low overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <h2 className="text-4xl font-black tracking-tighter">Galeri Kegiatan</h2>
+    <section className="py-14 md:py-24 bg-surface-container-low overflow-hidden">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6">
+        <div className="mb-9 flex flex-col md:flex-row md:items-end justify-between gap-4 md:mb-16 md:gap-6">
+          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">Galeri Kegiatan</h2>
           <p className="text-on-surface-variant md:text-right max-w-md">Dokumentasi transparansi dan aksi nyata BPBJ Kota Semarang dalam melayani masyarakat.</p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           {homepageGallery.map((item, idx) => (
             <Link to={`/gallery/${item.id}`} key={item.id} className={`aspect-square rounded-xl overflow-hidden group relative block ${idx % 2 !== 0 ? 'md:mt-8' : ''}`}>
               <img className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 

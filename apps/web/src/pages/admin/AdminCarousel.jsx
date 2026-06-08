@@ -157,13 +157,13 @@ export default function AdminCarousel() {
                   <AdminTextInput type="number" min="0" value={formData.displayOrder} onChange={(event) => setFormData({ ...formData, displayOrder: event.target.value })} placeholder="Contoh: 1" />
                 </AdminField>
               </div>
-              <label className="mt-5 flex cursor-pointer items-center justify-between gap-4 rounded-lg border border-slate-100 bg-slate-50 px-4 py-3">
+              <label className="mt-5 flex cursor-pointer items-center justify-between gap-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
                 <span>
                   <span className="block text-sm font-medium text-slate-800">Aktif ditampilkan di halaman utama</span>
                   <span className="block text-xs font-medium text-slate-500">Nonaktifkan untuk menyimpan banner tanpa menampilkannya.</span>
                 </span>
                 <input type="checkbox" checked={formData.isActive} onChange={(event) => setFormData({ ...formData, isActive: event.target.checked })}
-                  className="w-5 h-5 text-primary rounded focus:ring-primary" />
+                  className="h-5 w-5 rounded border-slate-200 text-primary focus:ring-primary/10" />
               </label>
               </AdminFormSection>
             </div>

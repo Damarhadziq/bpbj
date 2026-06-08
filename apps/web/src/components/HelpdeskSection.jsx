@@ -26,9 +26,9 @@ export default function HelpdeskSection() {
   if (links.length === 0) return null;
 
   return (
-    <section className="bg-white py-16">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="relative overflow-hidden rounded-3xl bg-slate-900 px-6 py-9 shadow-sm sm:px-10 lg:px-12">
+    <section className="bg-white py-12 md:py-16">
+      <div className="mx-auto max-w-7xl px-5 sm:px-6">
+        <div className="relative overflow-hidden rounded-2xl bg-slate-900 px-5 py-8 shadow-sm sm:rounded-3xl sm:px-10 lg:px-12">
           <img
             className="absolute inset-0 h-full w-full object-cover"
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuBn78QGl11E-TJ1I6NMoSK9Ft7_60fpFhtYRqDEp1kEZVlqGVwIi3KX85ewmEA_KaP6zlcOd2HR3WO-ILm1tRoeEHc7mmYKphOUANIVDKP_ycFJ6_Sijx18LtRK9alkg61Snbr-VcwaOnG6svRVkHRrbcv0rOu3Ee9uXCfwOnBIOZCnBm9Ri8HcEtLhYb3PTqGZhcqc8IY6QObbOJlFW70d-3JOB-OH5NmzPmns3xZtLGW24xrt2grgVpRHPbZSb8Dx4vuwWVUzdw"
@@ -38,18 +38,18 @@ export default function HelpdeskSection() {
           <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/85 to-slate-950/60"></div>
           <div className="absolute inset-0 bg-black/25"></div>
           <div className="relative z-10 max-w-4xl">
-            <h2 className="mb-3 text-4xl font-black tracking-tighter text-white md:text-5xl">Layanan Lainnya</h2>
-            <p className="mb-7 max-w-2xl text-lg leading-relaxed text-white/90">
+            <h2 className="mb-3 text-3xl font-semibold tracking-tight text-white md:text-5xl">Layanan Lainnya</h2>
+            <p className="mb-6 max-w-2xl text-base leading-7 text-white/90 md:mb-7 md:text-lg md:leading-relaxed">
               Akses cepat ke berbagai platform resmi dan layanan terkait pengadaan barang dan jasa di lingkungan Pemerintah Kota Semarang.
             </p>
-            <div className="flex flex-wrap gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
               {links.map((link) => (
                 <a
                   key={link.id}
                   href={link.linkUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group inline-flex items-center justify-center overflow-hidden rounded-xl border border-white/35 bg-white px-6 py-4 shadow-lg shadow-black/10 transition-all hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary"
+                  className="group inline-flex min-h-16 items-center justify-center overflow-hidden rounded-xl border border-white/35 bg-white px-4 py-3 shadow-lg shadow-black/10 transition-all hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary sm:px-6 sm:py-4"
                 >
                   <img
                     src={link.imageUrl}

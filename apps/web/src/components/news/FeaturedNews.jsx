@@ -40,7 +40,7 @@ export default function FeaturedNews({ newsData = [] }) {
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Berita Pilihan</p>
           </div>
           {sidebarArticles.length > 0 ? sidebarArticles.map(article => (
-            <Link to={`/news/${article.id}`} key={article.id} className="group grid grid-cols-[112px_1fr] gap-4 border-b border-slate-100 p-5 last:border-b-0">
+            <Link to={`/news/${article.id}`} key={article.id} className="group grid grid-cols-[88px_1fr] gap-3 border-b border-slate-100 p-4 last:border-b-0 sm:grid-cols-[112px_1fr] sm:gap-4 sm:p-5">
               <div className="aspect-[4/3] overflow-hidden rounded-md bg-slate-100">
                 <img alt={article.category} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" src={article.imageUrl || 'https://via.placeholder.com/400x300'}/>
               </div>

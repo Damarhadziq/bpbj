@@ -55,22 +55,22 @@ export default function HeroSection() {
   }, [nextSlide]);
 
   return (
-    <section id="hero-section" className="relative w-full pt-32 pb-20 px-6 min-h-[90vh] flex items-center bg-surface overflow-hidden">
-      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
+    <section id="hero-section" className="relative w-full px-5 pt-28 pb-14 sm:px-6 md:pt-32 md:pb-20 lg:min-h-[90vh] flex items-center bg-surface overflow-hidden">
+      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center relative z-10">
         {/* Left Side: Text */}
         <div className="flex flex-col justify-center order-2 lg:order-1">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-on-surface tracking-tighter leading-tight mb-6">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-on-surface tracking-tight leading-[1.18] mb-5 md:mb-6">
             Transformasi Pengadaan, <br/>
-            <span className="text-primary">Mewujudkan Semarang Hebat</span>
+            <span className="text-primary">Mewujudkan Semarang Semakin Hebat</span>
           </h1>
-          <p className="text-lg text-on-surface-variant max-w-xl mb-10 leading-relaxed">
+          <p className="text-base text-on-surface-variant max-w-xl mb-7 leading-7 md:mb-10 md:text-lg md:leading-relaxed">
             Membangun integritas dan transparansi dalam setiap proses pengadaan barang dan jasa untuk kemajuan infrastruktur serta layanan publik Kota Semarang.
           </p>
-          <div className="flex flex-wrap gap-4">
-            <a href="https://spse.inaproc.id/nasional/lelang" target="_blank" rel="noopener noreferrer" className="px-8 py-4 bg-primary text-on-primary font-bold rounded-lg hover:bg-primary-container transition-all active:scale-95 shadow-md shadow-primary/20">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
+            <a href="https://spse.inaproc.id/nasional/lelang" target="_blank" rel="noopener noreferrer" className="inline-flex justify-center px-6 py-3.5 bg-primary text-on-primary font-bold rounded-lg hover:bg-primary-container transition-all active:scale-95 shadow-md shadow-primary/20 sm:px-8 sm:py-4">
               Lihat Tender Aktif
             </a>
-            <a href="https://sirup.inaproc.id/sirup/caripaketctr/index" target="_blank" rel="noopener noreferrer" className="px-8 py-4 bg-transparent border-2 border-primary/20 text-primary font-bold rounded-lg hover:bg-primary/5 transition-all active:scale-95">
+            <a href="https://sirup.inaproc.id/sirup/caripaketctr/index" target="_blank" rel="noopener noreferrer" className="inline-flex justify-center px-6 py-3.5 bg-transparent border-2 border-primary/20 text-primary font-bold rounded-lg hover:bg-primary/5 transition-all active:scale-95 sm:px-8 sm:py-4">
               Rencana Umum Pengadaan
             </a>
           </div>
@@ -78,7 +78,7 @@ export default function HeroSection() {
 
         {/* Right Side: Carousel */}
         <div className="order-1 lg:order-2 flex flex-col gap-4 relative">
-          <div className="relative w-full rounded-2xl overflow-hidden shadow-2xl shadow-primary/10" style={{ aspectRatio: '16/9' }}>
+          <div className="relative w-full rounded-2xl overflow-hidden shadow-2xl shadow-slate-900/10" style={{ aspectRatio: '16/9' }}>
             {/* Slides */}
             <div className="absolute inset-0 overflow-hidden">
               {activeSlides.map((slide, index) => (
@@ -120,7 +120,7 @@ export default function HeroSection() {
           </div>
 
           {/* Navigation Arrows (below carousel) */}
-          <div className="flex justify-end gap-3 px-2">
+          <div className="hidden justify-end gap-3 px-2 sm:flex">
             <button
               onClick={prevSlide}
               className="w-12 h-12 rounded-full bg-surface-container-high border border-outline-variant/30 text-on-surface flex items-center justify-center hover:bg-surface-variant transition-all duration-300 active:scale-90 group"

@@ -198,16 +198,16 @@ export default function AdminNews() {
         )}
 
         <div className="mt-5 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-          <div className="rounded-lg bg-slate-50 p-4">
+          <div className="rounded-lg border border-slate-200 bg-white p-4">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
                 <h3 className="text-sm font-semibold text-slate-900">Sorotan Saat Ini</h3>
                 <p className="text-xs font-medium text-slate-500">Hanya satu berita yang tampil sebagai sorotan.</p>
               </div>
-              <span className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-slate-600">Maks. 1</span>
+              <span className="rounded-full bg-admin-list px-2.5 py-1 text-xs font-medium text-slate-600">Maks. 1</span>
             </div>
             {featuredNews ? (
-              <div className="mb-4 flex items-center gap-3 rounded-lg bg-white p-3">
+              <div className="mb-4 flex items-center gap-3 rounded-lg border border-slate-200 bg-admin-list p-3">
                 {featuredNews.imageUrl && <img src={featuredNews.imageUrl} alt="" className="h-12 w-12 rounded-lg object-cover" />}
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-slate-900">{featuredNews.title}</p>
@@ -224,7 +224,7 @@ export default function AdminNews() {
                 </button>
               </div>
             ) : (
-              <div className="mb-4 rounded-lg bg-white px-4 py-5 text-sm font-semibold text-slate-400">Belum ada berita sorotan.</div>
+              <div className="mb-4 rounded-lg border border-slate-200 bg-admin-list px-4 py-5 text-sm font-semibold text-slate-400">Belum ada berita sorotan.</div>
             )}
             <AdminSelect
               value=""
@@ -236,17 +236,17 @@ export default function AdminNews() {
             />
           </div>
 
-          <div className="rounded-lg bg-slate-50 p-4">
+          <div className="rounded-lg border border-slate-200 bg-white p-4">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
                 <h3 className="text-sm font-semibold text-slate-900">Berita Pilihan</h3>
                 <p className="text-xs font-medium text-slate-500">Gunakan untuk kumpulan berita yang perlu tetap mudah dipindai.</p>
               </div>
-              <span className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-slate-600">{selectedNews.length}/5</span>
+              <span className="rounded-full bg-admin-list px-2.5 py-1 text-xs font-medium text-slate-600">{selectedNews.length}/5</span>
             </div>
             <div className="mb-4 grid gap-2 sm:grid-cols-2">
               {selectedNews.map((item) => (
-                <div key={item.id} className="flex items-center gap-3 rounded-lg bg-white p-3">
+                <div key={item.id} className="flex items-center gap-3 rounded-lg border border-slate-200 bg-admin-list p-3">
                   {item.imageUrl && <img src={item.imageUrl} alt="" className="h-10 w-10 rounded-lg object-cover" />}
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-slate-900">{item.title}</p>
@@ -264,7 +264,7 @@ export default function AdminNews() {
                 </div>
               ))}
               {selectedNews.length === 0 && (
-                <div className="rounded-lg bg-white px-4 py-5 text-sm font-semibold text-slate-400 sm:col-span-2">Belum ada berita pilihan.</div>
+                <div className="rounded-lg border border-slate-200 bg-admin-list px-4 py-5 text-sm font-semibold text-slate-400 sm:col-span-2">Belum ada berita pilihan.</div>
               )}
             </div>
             <AdminSelect

@@ -1,28 +1,50 @@
+const coreFunctions = [
+  {
+    icon: 'account_tree',
+    title: 'Perencanaan & Koordinasi',
+    description: 'Merencanakan program, kegiatan, anggaran, serta melaksanakan koordinasi dengan perangkat daerah dan pihak terkait dalam penyelenggaraan pengadaan barang/jasa.'
+  },
+  {
+    icon: 'fact_check',
+    title: 'Pengelolaan Pengadaan',
+    description: 'Menyiapkan inventarisasi paket, riset dan analisis pasar, strategi pengadaan, pemilihan penyedia, katalog elektronik lokal/sektoral, serta pengelolaan kontrak.'
+  },
+  {
+    icon: 'dns',
+    title: 'Layanan Pengadaan Elektronik',
+    description: 'Mengelola sistem informasi pengadaan barang/jasa beserta infrastrukturnya, termasuk layanan, registrasi, verifikasi, pengembangan, pengamanan, dan informasi publik.'
+  },
+  {
+    icon: 'support_agent',
+    title: 'Pembinaan & Advokasi',
+    description: 'Melaksanakan pembinaan pelaku pengadaan, pengelolaan pengetahuan, bimbingan teknis, pendampingan, konsultasi, dan layanan penyelesaian sengketa kontrak.'
+  }
+];
+
 export default function TasksFunctionsSection() {
   return (
     <section className="scroll-mt-32" id="tugas-fungsi">
-      <h2 className="text-3xl font-extrabold text-on-surface tracking-tight mb-12 uppercase">Tugas &amp; Fungsi Pokok</h2>
-      <div className="grid md:grid-cols-3 gap-1">
-        <div className="md:col-span-2 bg-surface-container-low p-8 transition-colors hover:bg-surface-container-high">
-          <span className="material-symbols-outlined text-primary text-4xl mb-6">engineering</span>
-          <h4 className="font-bold text-xl mb-4">Pengelolaan Pengadaan</h4>
-          <p className="text-on-surface-variant leading-relaxed">Melaksanakan koordinasi, pembinaan, dan pengawasan terhadap seluruh tahapan pelaksanaan pengadaan barang dan jasa di lingkungan Pemerintah Kota Semarang.</p>
+      <h2 className="mb-7 text-2xl font-bold uppercase tracking-tight text-on-surface md:mb-12 md:text-3xl md:font-extrabold">Tugas Pokok &amp; Fungsi</h2>
+
+      <div className="grid gap-3 md:grid-cols-3 md:gap-1">
+        <div className="bg-surface-container-low p-5 transition-colors duration-300 ease-out hover:bg-surface-container-high md:col-span-3 md:p-8">
+          <span className="material-symbols-outlined mb-4 text-3xl text-primary md:mb-6 md:text-4xl">workspaces</span>
+          <h4 className="mb-3 text-lg font-bold md:mb-4 md:text-xl">Tugas Pokok</h4>
+          <p className="max-w-4xl leading-relaxed text-on-surface-variant">
+            Bagian Pengadaan Barang/Jasa mempunyai tugas merencanakan, mengkoordinasikan, membina, mengawasi, mengendalikan, dan mengevaluasi tugas Subbagian Pengelolaan Pengadaan Barang/Jasa, Layanan Pengadaan Secara Elektronik, serta Pembinaan dan Advokasi Pengadaan Barang/Jasa.
+          </p>
         </div>
-        <div className="bg-surface-container-highest p-8 transition-colors">
-          <span className="material-symbols-outlined text-primary text-4xl mb-6">monitoring</span>
-          <h4 className="font-bold text-xl mb-4">Advokasi &amp; Monitoring</h4>
-          <p className="text-on-surface-variant leading-relaxed">Memberikan pendampingan hukum dan teknis serta pemantauan evaluasi kinerja penyedia.</p>
-        </div>
-        <div className="bg-surface-container-highest p-8 transition-colors">
-          <span className="material-symbols-outlined text-primary text-4xl mb-6">devices</span>
-          <h4 className="font-bold text-xl mb-4">Layanan LPSE</h4>
-          <p className="text-on-surface-variant leading-relaxed">Pengelolaan infrastruktur dan sistem informasi pengadaan secara elektronik.</p>
-        </div>
-        <div className="md:col-span-2 bg-surface-container-low p-8 transition-colors hover:bg-surface-container-high">
-          <span className="material-symbols-outlined text-primary text-4xl mb-6">verified_user</span>
-          <h4 className="font-bold text-xl mb-4">Pembinaan SDM</h4>
-          <p className="text-on-surface-variant leading-relaxed">Meningkatkan kapasitas personil melalui pelatihan berkelanjutan dan sertifikasi profesi pengadaan barang/jasa sesuai standar nasional.</p>
-        </div>
+
+        {coreFunctions.map((item, index) => (
+          <div
+            key={item.title}
+            className={`bg-surface-container-low p-5 transition-colors duration-300 ease-out hover:bg-surface-container-high md:p-8 ${index === 3 ? 'md:col-span-3' : ''}`}
+          >
+            <span className="material-symbols-outlined mb-4 text-3xl text-primary md:mb-6 md:text-4xl">{item.icon}</span>
+            <h4 className="mb-3 text-lg font-bold md:mb-4 md:text-xl">{item.title}</h4>
+            <p className="leading-relaxed text-on-surface-variant">{item.description}</p>
+          </div>
+        ))}
       </div>
     </section>
   );

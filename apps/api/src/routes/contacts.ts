@@ -1,10 +1,9 @@
 import { Router } from 'express';
 import { db } from '../config/db';
-import { contacts } from '../db/schema';
+import { contacts, user as userTable } from '../db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { verifyAuth, requireRole } from '../middlewares/auth';
 import { validateConfirmationText, validateContactPayload, validateContactReplyPayload, validateContactStatus, validateUuid } from '../utils/validation';
-import { sendMail } from '../utils/email';
 
 const router = Router();
 
@@ -31,8 +30,27 @@ router.post('/', async (req, res) => {
 // GET all contact messages (Admin/Superadmin)
 router.get('/', verifyAuth, requireRole(['admin', 'superadmin']), async (req, res) => {
   try {
-    const allContacts = await db.select().from(contacts).orderBy(desc(contacts.createdAt));
-    return res.json(allContacts);
+    const allContacts = await db.select({
+      contact: contacts,
+      repliedByUser: {
+        id: userTable.id,
+        name: userTable.name,
+        email: userTable.email,
+        role: userTable.role,
+        image: userTable.image,
+      },
+    })
+      .from(contacts)
+      .leftJoin(userTable, eq(contacts.repliedBy, userTable.id))
+      .orderBy(desc(contacts.createdAt));
+
+    return res.json(allContacts.map(({ contact, repliedByUser }) => ({
+      ...contact,
+      repliedByName: repliedByUser?.name || null,
+      repliedByEmail: repliedByUser?.email || null,
+      repliedByRole: repliedByUser?.role || null,
+      repliedByImage: repliedByUser?.image || null,
+    })));
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Internal server error' });
@@ -70,33 +88,70 @@ router.post('/:id/reply', verifyAuth, requireRole(['admin', 'superadmin']), asyn
 
     const existing = await db.select().from(contacts).where(eq(contacts.id, id.data)).limit(1);
     if (existing.length === 0) return res.status(404).json({ error: 'Not found' });
-
-    let emailSent = false;
-    try {
-      emailSent = await sendMail({
-        to: existing[0].email,
-        subject: payload.data.replySubject,
-        text: payload.data.replyMessage,
-      });
-    } catch (error) {
-      console.error('Reply email failed:', error);
+    if (existing[0].replyMessage) {
+      return res.status(409).json({ error: 'Pengaduan ini sudah memiliki balasan tercatat. Hapus balasan lama sebelum membuat balasan baru.' });
     }
 
     const now = new Date();
+    const currentUser = (req as any).user;
     const updated = await db.update(contacts)
       .set({
         status: 'REPLIED',
         replySubject: payload.data.replySubject,
         replyMessage: payload.data.replyMessage,
         repliedAt: now,
-        repliedBy: (req as any).user?.id,
-        emailSentAt: emailSent ? now : null,
+        repliedBy: currentUser?.id,
+        emailSentAt: null,
         updatedAt: now,
       })
       .where(eq(contacts.id, id.data))
       .returning();
 
-    return res.json({ ...updated[0], emailSent });
+    return res.json({
+      ...updated[0],
+      repliedByName: currentUser?.name || null,
+      repliedByEmail: currentUser?.email || null,
+      repliedByRole: currentUser?.role || null,
+      repliedByImage: currentUser?.image || null,
+      emailSent: false,
+      emailClientRequired: true,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// DELETE recorded reply without deleting the contact message (Admin/Superadmin)
+router.delete('/:id/reply', verifyAuth, requireRole(['admin', 'superadmin']), async (req, res) => {
+  try {
+    const id = validateUuid(req.params.id);
+    if (!id.ok) return res.status(400).json({ error: id.error });
+
+    const existing = await db.select().from(contacts).where(eq(contacts.id, id.data)).limit(1);
+    if (existing.length === 0) return res.status(404).json({ error: 'Not found' });
+    if (!existing[0].replyMessage) return res.status(400).json({ error: 'Balasan tercatat tidak ditemukan' });
+
+    const updated = await db.update(contacts)
+      .set({
+        status: 'READ',
+        replySubject: null,
+        replyMessage: null,
+        repliedAt: null,
+        repliedBy: null,
+        emailSentAt: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(contacts.id, id.data))
+      .returning();
+
+    return res.json({
+      ...updated[0],
+      repliedByName: null,
+      repliedByEmail: null,
+      repliedByRole: null,
+      repliedByImage: null,
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Internal server error' });

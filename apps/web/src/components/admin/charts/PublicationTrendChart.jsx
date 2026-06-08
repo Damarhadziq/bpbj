@@ -364,7 +364,7 @@ export default function PublicationTrendChart({ news = [], gallery = [] }) {
               transform: 'translate(-50%, -100%)' 
             }}
           >
-            <div className="text-slate-400 font-medium border-b border-slate-100 pb-1 mb-1 text-center capitalize">
+            <div className="text-slate-400 font-medium border-b border-slate-200 pb-1 mb-1 text-center capitalize">
               {trendData[hoveredIdx].date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
             </div>
             {showNews && (

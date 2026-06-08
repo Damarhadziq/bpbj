@@ -27,10 +27,10 @@ export default function Navbar() {
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm dark:shadow-none font-['Inter'] antialiased tracking-tight">
-      <div className="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
-        <Link to="/" className="flex items-center gap-3 group">
-          <img src={logoSemarang} alt="Logo Kota Semarang" className="h-10 w-auto object-contain drop-shadow-sm group-hover:scale-105 transition-transform duration-200" />
-          <div className="text-xl font-black tracking-tighter text-red-700 dark:text-red-500 uppercase leading-tight">
+      <div className="flex justify-between items-center px-5 sm:px-6 py-3.5 md:py-4 max-w-7xl mx-auto">
+        <Link to="/" className="flex min-w-0 items-center gap-2.5 sm:gap-3 group">
+          <img src={logoSemarang} alt="Logo Kota Semarang" className="h-9 sm:h-10 w-auto object-contain drop-shadow-sm group-hover:scale-105 transition-transform duration-200" />
+          <div className="min-w-0 text-base sm:text-xl font-black tracking-tight sm:tracking-tighter text-red-700 dark:text-red-500 uppercase leading-tight">
             BPBJ Kota Semarang
           </div>
         </Link>

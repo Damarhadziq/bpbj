@@ -32,6 +32,7 @@ import carouselRouter from './routes/carousel';
 import analyticsRouter from './routes/analytics';
 import serviceLinksRouter from './routes/serviceLinks';
 import employeesRouter from './routes/employees';
+import regulationsRouter from './routes/regulations';
 import authSessionRouter from './routes/authSession';
 
 // App routes
@@ -45,6 +46,7 @@ app.use('/api/v1/carousel', carouselRouter);
 app.use('/api/v1/analytics', analyticsRouter);
 app.use('/api/v1/service-links', serviceLinksRouter);
 app.use('/api/v1/employees', employeesRouter);
+app.use('/api/v1/regulations', regulationsRouter);
 
 // Basic healthcheck
 app.get('/api/v1/health', (req, res) => {

@@ -167,7 +167,7 @@ export default function VisitorAnalyticsChart() {
                 key={idx}
                 className={`flex items-center justify-between rounded-lg border border-transparent p-2 transition-colors duration-200 ${
                   isHovered 
-                    ? 'bg-slate-50 border-slate-100' 
+                    ? 'bg-slate-50 border-slate-200' 
                     : 'hover:bg-slate-50/50'
                 }`}
                 onMouseEnter={() => setHoveredIdx(idx)}

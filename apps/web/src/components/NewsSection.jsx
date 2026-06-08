@@ -27,22 +27,22 @@ export default function NewsSection() {
   };
 
   return (
-    <section className="py-24 bg-surface">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex justify-between items-end mb-16">
+    <section className="py-14 md:py-24 bg-surface">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6">
+        <div className="mb-9 flex flex-col gap-4 md:mb-16 md:flex-row md:items-end md:justify-between">
           <div>
-            <h2 className="text-4xl font-black tracking-tighter mb-4">Warta Pengadaan</h2>
+            <h2 className="text-3xl font-semibold tracking-tight mb-3 md:text-4xl md:mb-4">Warta Pengadaan</h2>
             <p className="text-on-surface-variant max-w-xl">Informasi terkini seputar kebijakan, rilis tender, dan kegiatan Biro Pengadaan Barang dan Jasa Kota Semarang.</p>
           </div>
-          <Link to="/news" className="group flex items-center gap-2 text-primary font-bold transition-all hover:gap-3">
+          <Link to="/news" className="group flex w-fit items-center gap-2 text-primary font-bold transition-all hover:gap-3">
             Lihat Semua Berita
             <span className="material-symbols-outlined">arrow_forward</span>
           </Link>
         </div>
         
-        <div className="grid md:grid-cols-12 gap-8">
+        <div className="grid gap-8 md:grid-cols-12">
           <Link to={`/news/${featuredArticle.id}`} className="md:col-span-7 group cursor-pointer block">
-            <div className="relative aspect-video rounded-xl overflow-hidden mb-6">
+            <div className="relative aspect-video rounded-xl overflow-hidden mb-4 md:mb-6">
               <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                    src={featuredArticle.imageUrl || 'https://via.placeholder.com/800x450'} 
                    alt={featuredArticle.category}/>
@@ -53,13 +53,13 @@ export default function NewsSection() {
               )}
             </div>
             <span className="text-primary text-xs font-bold uppercase tracking-widest mb-3 block">{formatDate(featuredArticle.date)}</span>
-            <h3 className="text-3xl font-bold tracking-tight group-hover:text-primary transition-colors">{featuredArticle.title}</h3>
+            <h3 className="text-2xl font-bold tracking-tight leading-snug group-hover:text-primary transition-colors md:text-3xl">{featuredArticle.title}</h3>
           </Link>
           
-          <div className="md:col-span-5 flex flex-col gap-8">
+          <div className="md:col-span-5 flex flex-col gap-5 md:gap-8">
             {sideArticles.map(article => (
-              <Link to={`/news/${article.id}`} key={article.id} className="flex gap-6 group cursor-pointer">
-                <div className="w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-surface-container-low">
+              <Link to={`/news/${article.id}`} key={article.id} className="flex gap-4 group cursor-pointer md:gap-6">
+                <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-surface-container-low sm:h-32 sm:w-32">
                   <img className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                        src={article.imageUrl || 'https://via.placeholder.com/400x400'} 
                        alt={article.category}/>

@@ -77,13 +77,6 @@ export default function GalleryPage() {
           />
         </div>
       )}
-
-      {/* FAB for Mobile */}
-      <div className="fixed bottom-6 right-6 md:hidden">
-        <button className="w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center">
-          <span className="material-symbols-outlined">filter_list</span>
-        </button>
-      </div>
     </main>
   );
 }

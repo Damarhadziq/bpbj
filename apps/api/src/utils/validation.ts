@@ -58,11 +58,20 @@ export type ServiceLinkPayload = {
   displayOrder: number;
 };
 
+export type RegulationPayload = {
+  title: string;
+  category: string;
+  description: string;
+  linkUrl: string | null;
+  displayOrder: number;
+  isActive: boolean;
+};
+
 export type EmployeePayload = {
   name: string;
   position: string;
   quote: string | null;
-  imageUrl: string;
+  imageUrl: string | null;
   imageAlt?: string;
   displayOrder: number;
   isActive: boolean;
@@ -415,6 +424,36 @@ export const validateServiceLinkPayload = (input: unknown): ValidationResult<Ser
   return valid({ imageUrl: imageUrl.data, linkUrl: linkUrl.data, displayOrder: displayOrder.data });
 };
 
+export const validateRegulationPayload = (input: unknown): ValidationResult<RegulationPayload> => {
+  const body = getBody(input);
+  if (!body.ok) return body;
+
+  const title = requiredString(body.data, 'title', 255);
+  if (!title.ok) return title;
+  const category = requiredString(body.data, 'category', 100);
+  if (!category.ok) return category;
+  const description = requiredString(body.data, 'description', 2000);
+  if (!description.ok) return description;
+  const linkUrl = optionalString(body.data, 'linkUrl', 2048);
+  if (!linkUrl.ok) return linkUrl;
+  if (linkUrl.data && !externalUrlPattern.test(linkUrl.data)) {
+    return invalid('linkUrl must be a valid http or https URL');
+  }
+  const displayOrder = integerField(body.data, 'displayOrder', 0);
+  if (!displayOrder.ok) return displayOrder;
+  const isActive = optionalBoolean(body.data, 'isActive', true);
+  if (!isActive.ok) return isActive;
+
+  return valid({
+    title: title.data,
+    category: category.data,
+    description: description.data,
+    linkUrl: linkUrl.data || null,
+    displayOrder: displayOrder.data,
+    isActive: isActive.data,
+  });
+};
+
 export const validateEmployeePayload = (input: unknown): ValidationResult<EmployeePayload> => {
   const body = getBody(input);
   if (!body.ok) return body;
@@ -428,7 +467,7 @@ export const validateEmployeePayload = (input: unknown): ValidationResult<Employ
   if (quote.data && wordCount(quote.data) > maxEmployeeQuoteWords) {
     return invalid(`quote must be ${maxEmployeeQuoteWords} words or fewer`);
   }
-  const imageUrl = requiredString(body.data, 'imageUrl', maxImageLength);
+  const imageUrl = optionalString(body.data, 'imageUrl', maxImageLength);
   if (!imageUrl.ok) return imageUrl;
   const imageAlt = optionalString(body.data, 'imageAlt', 255);
   if (!imageAlt.ok) return imageAlt;
@@ -441,7 +480,7 @@ export const validateEmployeePayload = (input: unknown): ValidationResult<Employ
     name: name.data,
     position: position.data,
     quote: quote.data || null,
-    imageUrl: imageUrl.data,
+    imageUrl: imageUrl.data || null,
     imageAlt: imageAlt.data,
     displayOrder: displayOrder.data,
     isActive: isActive.data,

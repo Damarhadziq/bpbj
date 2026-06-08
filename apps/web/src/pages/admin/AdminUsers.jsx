@@ -2,7 +2,31 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUsers, useCreateUser, useUpdateUserRole, useDeleteUser, useChangeUserPassword, useChangeOwnPassword } from '../../hooks/useUsers';
 import { signOut, useSession } from '../../lib/authClient';
-import { AdminButton, AdminModal, AdminPageHeader, AdminSelect, AdminTableCard, AdminTextInput } from '../../components/admin/AdminUI';
+import { AdminButton, AdminConfirmDialog, AdminModal, AdminPageHeader, AdminSelect, AdminTableCard, AdminTextInput } from '../../components/admin/AdminUI';
+
+function UserAvatar({ user, size = 'sm' }) {
+  const sizes = {
+    sm: 'h-9 w-9 text-sm',
+    lg: 'h-14 w-14 text-lg',
+  };
+  const sizeClassName = sizes[size] || sizes.sm;
+
+  if (user.image) {
+    return (
+      <img
+        src={user.image}
+        alt=""
+        className={`${sizeClassName} flex-shrink-0 rounded-full object-cover`}
+      />
+    );
+  }
+
+  return (
+    <div className={`${sizeClassName} flex flex-shrink-0 items-center justify-center rounded-full bg-primary/10 font-medium text-primary`}>
+      {user.name?.charAt(0)?.toUpperCase() || '?'}
+    </div>
+  );
+}
 
 function PasswordInput({ value, onChange, placeholder = '', autoComplete = 'new-password' }) {
   const [isVisible, setIsVisible] = useState(false);
@@ -44,6 +68,7 @@ export default function AdminUsers() {
   const [isOwnPasswordModalOpen, setIsOwnPasswordModalOpen] = useState(false);
   const [passwordTarget, setPasswordTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [roleTarget, setRoleTarget] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -87,9 +112,13 @@ export default function AdminUsers() {
   };
 
   const handleRoleChange = async (id, newRole) => {
-    if (window.confirm(`Ubah role pengguna ini menjadi "${newRole}"?`)) {
-      await updateRoleMutation.mutateAsync({ id, role: newRole });
-    }
+    const targetUser = users.find((user) => user.id === id);
+    setRoleTarget({ id, name: targetUser?.name || 'Pengguna', email: targetUser?.email || '', role: newRole });
+  };
+
+  const confirmRoleChange = async () => {
+    await updateRoleMutation.mutateAsync({ id: roleTarget.id, role: roleTarget.role });
+    setRoleTarget(null);
   };
 
   const openPasswordModal = (user) => {
@@ -155,6 +184,8 @@ export default function AdminUsers() {
     admin: 'bg-blue-50 text-blue-700 border-blue-200',
   };
   const roleOptions = ['admin', 'superadmin'];
+  const superadmins = users.filter((user) => user.role === 'superadmin');
+  const adminUsers = users.filter((user) => user.role !== 'superadmin');
 
   if (isLoading) {
     return <div className="text-center py-20 text-slate-400">Memuat data pengguna...</div>;
@@ -165,15 +196,47 @@ export default function AdminUsers() {
       <AdminPageHeader
         eyebrow="Keamanan"
         title="Kelola Akun Admin"
-        actions={(
-          <>
-            <AdminButton onClick={openOwnPasswordModal} variant="dark" icon="lock_reset">Ubah Password Saya</AdminButton>
-            <AdminButton onClick={openCreateModal} icon="person_add">Tambah Admin</AdminButton>
-          </>
-        )}
+        actions={<AdminButton onClick={openCreateModal} icon="person_add">Tambah Admin</AdminButton>}
       />
 
-      {/* Table */}
+      {superadmins.length > 0 && (
+        <section className="mb-6">
+          <div className="mb-3">
+            <p className="text-xs font-medium uppercase tracking-wide text-primary">Profil Superadmin</p>
+            <h2 className="mt-1 text-lg font-semibold tracking-tight text-slate-950">Akses Pengelola Utama</h2>
+          </div>
+          <div className="grid gap-4">
+            {superadmins.map((user) => {
+              const isSelf = user.id === session?.user?.id;
+              return (
+                <article key={user.id} className="rounded-lg border border-slate-200 bg-white p-4">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-center gap-4">
+                      <UserAvatar user={user} size="lg" />
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="truncate text-xl font-semibold tracking-tight text-slate-950">{user.name}</h3>
+                          {isSelf && <span className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-primary">Anda</span>}
+                          <span className={`rounded-lg border px-3 py-1.5 text-xs font-medium ${roleColors[user.role] || 'border-slate-200 bg-slate-50 text-slate-600'}`}>
+                            {user.role}
+                          </span>
+                        </div>
+                        <p className="mt-1 truncate text-sm text-slate-500">{user.email}</p>
+                      </div>
+                    </div>
+                    {isSelf && (
+                      <AdminButton onClick={openOwnPasswordModal} variant="neutral" icon="lock_reset" className="w-full sm:w-auto">
+                        Ubah Password
+                      </AdminButton>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       <AdminTableCard>
           <table className="w-full text-left">
             <thead>
@@ -186,15 +249,13 @@ export default function AdminUsers() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {users.map((user) => {
+              {adminUsers.map((user) => {
                 const isSelf = user.id === session?.user?.id;
                 return (
                   <tr key={user.id} className={`hover:bg-slate-50/50 transition-colors ${isSelf ? 'bg-primary/5' : ''}`}>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-medium text-sm">
-                          {user.name?.charAt(0)?.toUpperCase() || '?'}
-                        </div>
+                        <UserAvatar user={user} />
                         <div>
                           <p className="font-semibold text-slate-800">
                             {user.name}
@@ -249,10 +310,10 @@ export default function AdminUsers() {
                   </tr>
                 );
               })}
-              {users.length === 0 && (
+              {adminUsers.length === 0 && (
                 <tr><td colSpan="5" className="px-6 py-16 text-center text-slate-400">
                   <span className="material-symbols-outlined text-5xl mb-3 opacity-30">group</span>
-                  <p>Belum ada pengguna terdaftar.</p>
+                  <p>Belum ada akun admin terdaftar.</p>
                 </td></tr>
               )}
             </tbody>
@@ -421,6 +482,21 @@ export default function AdminUsers() {
               </div>
             </form>
         </AdminModal>
+      )}
+
+      {roleTarget && (
+        <AdminConfirmDialog
+          eyebrow="Perubahan Role"
+          title="Ubah Role Pengguna?"
+          description={`Akun ${roleTarget.name}${roleTarget.email ? ` (${roleTarget.email})` : ''} akan diubah menjadi ${roleTarget.role}. Pastikan perubahan akses ini sudah sesuai.`}
+          confirmText="Ubah Role"
+          cancelText="Batal"
+          icon="manage_accounts"
+          tone="amber"
+          isLoading={updateRoleMutation.isPending}
+          onCancel={() => setRoleTarget(null)}
+          onConfirm={confirmRoleChange}
+        />
       )}
     </div>
   );

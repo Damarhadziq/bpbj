@@ -15,7 +15,7 @@ export default function SEOHead({
   schemas = [],
   noindex = false,
 }) {
-  const fullTitle = title || `${seoConfig.siteName} - Portal Pengadaan Barang dan Jasa`;
+  const fullTitle = title || `${seoConfig.siteName} - Website Resmi Pengadaan Barang dan Jasa`;
   const fullDescription = description || seoConfig.defaultDescription;
   const canonicalUrl = `${seoConfig.baseUrl}${path}`;
   const ogImage = image || seoConfig.defaultImage;

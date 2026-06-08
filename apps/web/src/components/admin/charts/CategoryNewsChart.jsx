@@ -83,7 +83,7 @@ export default function CategoryNewsChart({ news = [] }) {
               key={idx}
               className={`group flex items-center gap-4 rounded-lg border border-transparent px-2.5 py-1.5 transition-colors duration-200 ${
                 isHovered 
-                  ? 'bg-slate-50 border-slate-100' 
+                  ? 'bg-slate-50 border-slate-200' 
                   : 'hover:bg-slate-50/50'
               }`}
               onMouseEnter={() => setHoveredIdx(idx)}
@@ -137,9 +137,9 @@ export default function CategoryNewsChart({ news = [] }) {
       </div>
       
       {/* Dynamic Summary Card */}
-      <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-[11px] font-medium text-slate-400">
+      <div className="mt-4 pt-3 border-t border-slate-200 flex justify-between items-center text-[11px] font-medium text-slate-400">
         <span>TOTAL ARTIKEL</span>
-        <span className="text-slate-700 font-medium px-2 py-0.5 bg-slate-50 border border-slate-100 rounded-md">
+        <span className="text-slate-700 font-medium px-2 py-0.5 bg-slate-50 border border-slate-200 rounded-md">
           {totalNewsCount} Berita
         </span>
       </div>

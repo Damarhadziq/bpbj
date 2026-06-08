@@ -142,7 +142,7 @@ export default function AdminLogin() {
                   autoComplete="username"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-4 py-3 border border-outline-variant rounded-lg shadow-sm placeholder-slate-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm transition-all"
+                  className="appearance-none block w-full px-4 py-3 border border-slate-200 rounded-lg shadow-sm placeholder-slate-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm transition-all"
                   placeholder="admin@semarangkota.go.id"
                 />
               </div>
@@ -159,7 +159,7 @@ export default function AdminLogin() {
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-4 py-3 pr-12 border border-outline-variant rounded-lg shadow-sm placeholder-slate-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm transition-all"
+                  className="appearance-none block w-full px-4 py-3 pr-12 border border-slate-200 rounded-lg shadow-sm placeholder-slate-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm transition-all"
                   placeholder="Password admin"
                 />
                 <button

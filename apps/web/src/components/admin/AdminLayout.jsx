@@ -150,6 +150,7 @@ export default function AdminLayout() {
     { name: 'Galeri', path: '/admin/gallery', icon: 'photo_library', roles: ['admin', 'superadmin'] },
     { name: 'Layanan Lainnya', path: '/admin/service-links', icon: 'widgets', roles: ['admin', 'superadmin'] },
     { name: 'Pegawai BPBJ', path: '/admin/employees', icon: 'badge', roles: ['admin', 'superadmin'] },
+    { name: 'Regulasi', path: '/admin/regulations', icon: 'gavel', roles: ['admin', 'superadmin'] },
     { name: 'Pengaduan', path: '/admin/contacts', icon: 'forum', roles: ['admin', 'superadmin'], unreadCount: unreadContacts },
     { name: 'Sambutan Kepala', path: '/admin/welcome', icon: 'campaign', roles: ['admin', 'superadmin'] },
     { name: 'Manajemen Akun', path: '/admin/users', icon: 'manage_accounts', roles: ['superadmin'] },
@@ -245,7 +246,7 @@ export default function AdminLayout() {
 
             {isProfileMenuOpen && (
               <div className="absolute right-0 top-12 z-50 w-64 rounded-lg border border-slate-200 bg-white p-2 shadow-lg shadow-slate-950/10">
-                <div className="border-b border-slate-100 px-3 py-2">
+                <div className="border-b border-slate-200 px-3 py-2">
                   <p className="truncate text-sm font-medium text-slate-900">{profile.email}</p>
                   <p className="text-xs text-slate-500">Email tidak dapat diubah dari profil.</p>
                 </div>
@@ -279,7 +280,7 @@ export default function AdminLayout() {
       {pendingNavigation && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/45 px-4 backdrop-blur-sm" role="dialog" aria-modal="true">
           <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-950/10">
-            <div className="mb-5 flex items-start gap-3 border-b border-slate-100 pb-5">
+            <div className="mb-5 flex items-start gap-3 border-b border-slate-200 pb-5">
               <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
                 <span className="material-symbols-outlined">edit_note</span>
               </div>

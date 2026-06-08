@@ -490,7 +490,7 @@ export default function AdminGallery() {
               </AdminField>
               <label className="flex cursor-pointer items-center gap-3">
                 <input type="checkbox" checked={formData.isFeatured} onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-                  className="h-5 w-5 rounded text-primary focus-visible:ring-primary" />
+                    className="h-5 w-5 rounded border-slate-200 text-primary focus-visible:ring-primary/10" />
                 <span>
                   <span className="block text-sm font-medium text-slate-700">Prioritaskan tampil di beranda</span>
                   <span className="block text-xs font-medium text-slate-500">Galeri yang dicentang akan didahulukan pada section Galeri Kegiatan di halaman utama.</span>

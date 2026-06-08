@@ -137,12 +137,24 @@ export const serviceLinks = pgTable('service_links', {
   updatedAt: timestamp('updated_at').notNull().defaultNow()
 });
 
+export const regulations = pgTable('regulations', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  title: varchar('title', { length: 255 }).notNull(),
+  category: varchar('category', { length: 100 }).notNull(),
+  description: text('description').notNull(),
+  linkUrl: text('link_url'),
+  displayOrder: integer('display_order').default(0).notNull(),
+  isActive: boolean('is_active').default(true).notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow()
+});
+
 export const employees = pgTable('employees', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
   position: varchar('position', { length: 255 }).notNull(),
   quote: text('quote'),
-  imageUrl: text('image_url').notNull(),
+  imageUrl: text('image_url'),
   imageAlt: varchar('image_alt', { length: 255 }),
   displayOrder: integer('display_order').default(0).notNull(),
   isActive: boolean('is_active').default(true).notNull(),

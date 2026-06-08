@@ -11,7 +11,7 @@ export default function NewsFilters({
   categories = [NEWS_CATEGORY_ALL, ...NEWS_CATEGORIES],
 }) {
   return (
-    <section className="mb-10 rounded-lg border border-slate-200 bg-white p-4">
+    <section className="mb-8 rounded-lg border border-slate-200 bg-white p-3 sm:p-4 md:mb-10">
       <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="relative w-full lg:max-w-sm">
           <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
@@ -33,12 +33,12 @@ export default function NewsFilters({
           />
         </div>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-3 pt-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 sm:pt-0">
         {categories.map(cat => (
           <button 
             key={cat}
             onClick={() => setCategoryFilter(cat)}
-            className={`rounded-md px-4 py-2 text-sm font-bold transition-colors ${
+            className={`flex-shrink-0 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
               categoryFilter === cat 
                 ? 'bg-primary text-white' 
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
