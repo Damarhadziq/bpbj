@@ -1,6 +1,4 @@
-import { pgTable, text, timestamp, boolean, varchar, uuid, integer, pgEnum, jsonb } from 'drizzle-orm/pg-core';
-
-export const roleEnum = pgEnum('role', ['admin', 'superadmin']);
+import { pgTable, text, timestamp, boolean, varchar, uuid, integer, jsonb } from 'drizzle-orm/pg-core';
 
 // Better Auth core tables
 export const user = pgTable('user', {
@@ -11,7 +9,7 @@ export const user = pgTable('user', {
   image: text('image'),
   createdAt: timestamp('createdAt').notNull(),
   updatedAt: timestamp('updatedAt').notNull(),
-  role: roleEnum('role').default('admin').notNull()
+  role: varchar('role', { length: 20 }).default('admin').notNull()
 });
 
 export const session = pgTable('session', {
@@ -53,7 +51,7 @@ export const verification = pgTable('verification', {
 
 // App specific tables
 export const news = pgTable('news', {
-  id: uuid('id').defaultRandom().primaryKey(),
+  id: uuid('id').primaryKey(),
   title: varchar('title', { length: 255 }).notNull(),
   slug: varchar('slug', { length: 255 }).notNull().unique(),
   category: varchar('category', { length: 50 }).notNull(),
@@ -69,7 +67,7 @@ export const news = pgTable('news', {
 });
 
 export const gallery = pgTable('gallery', {
-  id: uuid('id').defaultRandom().primaryKey(),
+  id: uuid('id').primaryKey(),
   title: varchar('title', { length: 255 }).notNull(),
   category: varchar('category', { length: 50 }).notNull(),
   location: varchar('location', { length: 255 }),
@@ -84,7 +82,7 @@ export const gallery = pgTable('gallery', {
 });
 
 export const contacts = pgTable('contacts', {
-  id: uuid('id').defaultRandom().primaryKey(),
+  id: uuid('id').primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).notNull(),
   subject: varchar('subject', { length: 255 }),
@@ -110,7 +108,7 @@ export const headWelcome = pgTable('head_welcome', {
 });
 
 export const carousel = pgTable('carousel', {
-  id: uuid('id').defaultRandom().primaryKey(),
+  id: uuid('id').primaryKey(),
   title: varchar('title', { length: 255 }).notNull(),
   description: text('description'),
   imageUrl: text('image_url').notNull(),
@@ -122,14 +120,14 @@ export const carousel = pgTable('carousel', {
 });
 
 export const visits = pgTable('visits', {
-  id: uuid('id').defaultRandom().primaryKey(),
+  id: uuid('id').primaryKey(),
   device: varchar('device', { length: 20 }).notNull(), // 'desktop', 'mobile', 'tablet'
   visitorType: varchar('visitor_type', { length: 20 }).notNull(), // 'new', 'returning'
   createdAt: timestamp('created_at').notNull().defaultNow()
 });
 
 export const serviceLinks = pgTable('service_links', {
-  id: uuid('id').defaultRandom().primaryKey(),
+  id: uuid('id').primaryKey(),
   imageUrl: text('image_url').notNull(),
   linkUrl: text('link_url').notNull(),
   displayOrder: integer('display_order').default(0).notNull(),
@@ -137,8 +135,22 @@ export const serviceLinks = pgTable('service_links', {
   updatedAt: timestamp('updated_at').notNull().defaultNow()
 });
 
+export const floatingWidgets = pgTable('floating_widgets', {
+  id: uuid('id').primaryKey(),
+  label: varchar('label', { length: 100 }).notNull(),
+  description: varchar('description', { length: 255 }).notNull(),
+  href: text('href').notNull(),
+  imageUrl: text('image_url'),
+  icon: varchar('icon', { length: 80 }),
+  displayOrder: integer('display_order').default(0).notNull(),
+  isActive: boolean('is_active').default(true).notNull(),
+  openInNewTab: boolean('open_in_new_tab').default(false).notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow()
+});
+
 export const regulations = pgTable('regulations', {
-  id: uuid('id').defaultRandom().primaryKey(),
+  id: uuid('id').primaryKey(),
   title: varchar('title', { length: 255 }).notNull(),
   category: varchar('category', { length: 100 }).notNull(),
   description: text('description').notNull(),
@@ -150,7 +162,7 @@ export const regulations = pgTable('regulations', {
 });
 
 export const employees = pgTable('employees', {
-  id: uuid('id').defaultRandom().primaryKey(),
+  id: uuid('id').primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
   position: varchar('position', { length: 255 }).notNull(),
   quote: text('quote'),

@@ -58,6 +58,17 @@ export type ServiceLinkPayload = {
   displayOrder: number;
 };
 
+export type FloatingWidgetPayload = {
+  label: string;
+  description: string;
+  href: string;
+  imageUrl: string | null;
+  icon: string | null;
+  displayOrder: number;
+  isActive: boolean;
+  openInNewTab: boolean;
+};
+
 export type RegulationPayload = {
   title: string;
   category: string;
@@ -113,6 +124,7 @@ const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const maxImageLength = 10 * 1024 * 1024;
 const maxEmployeeQuoteWords = 20;
 const externalUrlPattern = /^https?:\/\/[^\s/$.?#].[^\s]*$/i;
+const internalOrExternalUrlPattern = /^(https?:\/\/[^\s/$.?#].[^\s]*|\/[^\s]*)$/i;
 export const NEWS_CATEGORIES = ['Informasi', 'Kegiatan', 'Layanan', 'Sosialisasi', 'Market Sounding'] as const;
 
 const normalizeCategory = (category = '') => category.trim().toLowerCase();
@@ -422,6 +434,41 @@ export const validateServiceLinkPayload = (input: unknown): ValidationResult<Ser
   if (!displayOrder.ok) return displayOrder;
 
   return valid({ imageUrl: imageUrl.data, linkUrl: linkUrl.data, displayOrder: displayOrder.data });
+};
+
+export const validateFloatingWidgetPayload = (input: unknown): ValidationResult<FloatingWidgetPayload> => {
+  const body = getBody(input);
+  if (!body.ok) return body;
+
+  const label = requiredString(body.data, 'label', 100);
+  if (!label.ok) return label;
+  const description = optionalString(body.data, 'description', 255);
+  if (!description.ok) return description;
+  const href = requiredString(body.data, 'href', 2048);
+  if (!href.ok) return href;
+  if (!internalOrExternalUrlPattern.test(href.data)) return invalid('href must be an internal path or valid http/https URL');
+  const imageUrl = optionalString(body.data, 'imageUrl', maxImageLength);
+  if (!imageUrl.ok) return imageUrl;
+  const icon = optionalString(body.data, 'icon', 80);
+  if (!icon.ok) return icon;
+  if (!imageUrl.data && !icon.data) return invalid('imageUrl or icon is required');
+  const displayOrder = integerField(body.data, 'displayOrder', 0);
+  if (!displayOrder.ok) return displayOrder;
+  const isActive = optionalBoolean(body.data, 'isActive', true);
+  if (!isActive.ok) return isActive;
+  const openInNewTab = optionalBoolean(body.data, 'openInNewTab', /^https?:\/\//i.test(href.data));
+  if (!openInNewTab.ok) return openInNewTab;
+
+  return valid({
+    label: label.data,
+    description: description.data || label.data,
+    href: href.data,
+    imageUrl: imageUrl.data || null,
+    icon: icon.data || null,
+    displayOrder: displayOrder.data,
+    isActive: isActive.data,
+    openInNewTab: openInNewTab.data,
+  });
 };
 
 export const validateRegulationPayload = (input: unknown): ValidationResult<RegulationPayload> => {

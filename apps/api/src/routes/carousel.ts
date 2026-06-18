@@ -4,6 +4,7 @@ import { db } from '../config/db';
 import { carousel } from '../db/schema';
 import { verifyAuth, requireRole } from '../middlewares/auth';
 import { validateCarouselPayload, validateUuid } from '../utils/validation';
+import { createId } from '../utils/id';
 
 const router = Router();
 
@@ -23,6 +24,7 @@ router.post('/', verifyAuth, requireRole(['admin', 'superadmin']), async (req, r
     if (!payload.ok) return res.status(400).json({ error: payload.error });
 
     const created = await db.insert(carousel).values({
+      id: createId(),
       title: payload.data.imageAlt || 'Carousel image',
       description: null,
       imageUrl: payload.data.imageUrl,

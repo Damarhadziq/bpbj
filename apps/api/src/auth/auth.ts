@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const trustedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173,http://127.0.0.1:5173")
+const trustedOrigins = (process.env.FRONTEND_URL || "http://localhost:5175,http://127.0.0.1:5175")
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);

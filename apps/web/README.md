@@ -1,16 +1,20 @@
-# React + Vite
+# Frontend Website BPBJ Kota Semarang
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend dibangun dengan React, Vite, Tailwind CSS, React Router, TanStack Query, dan Axios.
 
-Currently, two official plugins are available:
+Perintah utama:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm run dev
+npm run lint
+npm run build
+npm run preview
+```
 
-## React Compiler
+Konfigurasi API production berada di `.env.production`:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```env
+VITE_API_BASE_URL=https://api.bpbj.semarangkota.go.id/api/v1
+```
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Panduan lengkap struktur aplikasi dan deployment VPS ada di README utama project: `../../README.md`.

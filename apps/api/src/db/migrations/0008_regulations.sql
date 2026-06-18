@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS "regulations" (
-  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+  "id" uuid PRIMARY KEY NOT NULL,
   "title" varchar(255) NOT NULL,
   "category" varchar(100) NOT NULL,
   "description" text NOT NULL,

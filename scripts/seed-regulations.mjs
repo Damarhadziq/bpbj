@@ -1,4 +1,5 @@
 import pg from 'pg';
+import { randomUUID } from 'crypto';
 
 const { Pool } = pg;
 
@@ -60,7 +61,7 @@ const pool = new Pool({ connectionString: databaseUrl });
 async function main() {
   await pool.query(`
     create table if not exists regulations (
-      id uuid primary key default gen_random_uuid(),
+      id uuid primary key,
       title varchar(255) not null,
       category varchar(100) not null,
       description text not null,
@@ -94,9 +95,9 @@ async function main() {
       updated += 1;
     } else {
       await pool.query(
-        `insert into regulations (title, category, description, link_url, display_order, is_active)
-         values ($1, $2, $3, $4, $5, $6)`,
-        values,
+        `insert into regulations (id, title, category, description, link_url, display_order, is_active)
+         values ($1, $2, $3, $4, $5, $6, $7)`,
+        [randomUUID(), ...values],
       );
       inserted += 1;
     }

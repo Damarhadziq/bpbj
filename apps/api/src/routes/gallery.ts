@@ -4,6 +4,7 @@ import { gallery } from '../db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { verifyAuth, requireRole } from '../middlewares/auth';
 import { validateGalleryPayload, validateUuid } from '../utils/validation';
+import { createId } from '../utils/id';
 
 const router = Router();
 
@@ -40,6 +41,7 @@ router.post('/', verifyAuth, requireRole(['admin', 'superadmin']), async (req, r
     if (!payload.ok) return res.status(400).json({ error: payload.error });
     
     const newItem = await db.insert(gallery).values({
+      id: createId(),
       title: payload.data.title,
       category: payload.data.category,
       location: payload.data.location,

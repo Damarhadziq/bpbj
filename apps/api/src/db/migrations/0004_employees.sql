@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS "employees" (
-  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+  "id" uuid PRIMARY KEY NOT NULL,
   "name" varchar(255) NOT NULL,
   "position" varchar(255) NOT NULL,
   "image_url" text NOT NULL,

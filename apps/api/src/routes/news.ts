@@ -4,6 +4,7 @@ import { news } from '../db/schema';
 import { and, count, desc, eq, ne } from 'drizzle-orm';
 import { verifyAuth, requireRole } from '../middlewares/auth';
 import { NEWS_CATEGORIES, validateNewsPayload, validateUuid } from '../utils/validation';
+import { createId } from '../utils/id';
 
 const router = Router();
 const MAX_SELECTED_NEWS = 5;
@@ -75,6 +76,7 @@ router.post('/', verifyAuth, requireRole(['admin', 'superadmin']), async (req, r
     }
     
     const newArticle = await db.insert(news).values({
+      id: createId(),
       title: payload.data.title,
       slug: payload.data.slug,
       category: payload.data.category,

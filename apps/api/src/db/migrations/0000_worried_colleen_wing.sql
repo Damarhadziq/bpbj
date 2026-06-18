@@ -1,4 +1,3 @@
-CREATE TYPE "public"."role" AS ENUM('admin', 'superadmin');--> statement-breakpoint
 CREATE TABLE "account" (
 	"id" text PRIMARY KEY NOT NULL,
 	"accountId" text NOT NULL,
@@ -17,7 +16,7 @@ CREATE TABLE "account" (
 );
 --> statement-breakpoint
 CREATE TABLE "contacts" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"id" uuid PRIMARY KEY NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"email" varchar(255) NOT NULL,
 	"subject" varchar(255),
@@ -27,7 +26,7 @@ CREATE TABLE "contacts" (
 );
 --> statement-breakpoint
 CREATE TABLE "gallery" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"id" uuid PRIMARY KEY NOT NULL,
 	"title" varchar(255) NOT NULL,
 	"category" varchar(50) NOT NULL,
 	"location" varchar(255),
@@ -50,7 +49,7 @@ CREATE TABLE "head_welcome" (
 );
 --> statement-breakpoint
 CREATE TABLE "news" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"id" uuid PRIMARY KEY NOT NULL,
 	"title" varchar(255) NOT NULL,
 	"slug" varchar(255) NOT NULL,
 	"category" varchar(50) NOT NULL,
@@ -85,7 +84,7 @@ CREATE TABLE "user" (
 	"image" text,
 	"createdAt" timestamp NOT NULL,
 	"updatedAt" timestamp NOT NULL,
-	"role" "role" DEFAULT 'admin' NOT NULL,
+	"role" varchar(20) DEFAULT 'admin' NOT NULL,
 	CONSTRAINT "user_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint

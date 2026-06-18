@@ -8,7 +8,7 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173,http://127.0.0.1:5173')
+const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5175,http://127.0.0.1:5175')
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
@@ -31,6 +31,7 @@ import usersRouter from './routes/users';
 import carouselRouter from './routes/carousel';
 import analyticsRouter from './routes/analytics';
 import serviceLinksRouter from './routes/serviceLinks';
+import floatingWidgetsRouter from './routes/floatingWidgets';
 import employeesRouter from './routes/employees';
 import regulationsRouter from './routes/regulations';
 import authSessionRouter from './routes/authSession';
@@ -45,6 +46,7 @@ app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/carousel', carouselRouter);
 app.use('/api/v1/analytics', analyticsRouter);
 app.use('/api/v1/service-links', serviceLinksRouter);
+app.use('/api/v1/floating-widgets', floatingWidgetsRouter);
 app.use('/api/v1/employees', employeesRouter);
 app.use('/api/v1/regulations', regulationsRouter);
 

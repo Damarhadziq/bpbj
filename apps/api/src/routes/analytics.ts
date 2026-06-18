@@ -4,6 +4,7 @@ import { visits } from '../db/schema';
 import { sql } from 'drizzle-orm';
 import { validateAnalyticsVisit } from '../utils/validation';
 import { verifyAuth, requireRole } from '../middlewares/auth';
+import { createId } from '../utils/id';
 
 const router = Router();
 
@@ -14,6 +15,7 @@ router.post('/visit', async (req, res) => {
     if (!payload.ok) return res.status(400).json({ error: payload.error });
 
     await db.insert(visits).values({
+      id: createId(),
       device: payload.data.device,
       visitorType: payload.data.visitorType,
     });

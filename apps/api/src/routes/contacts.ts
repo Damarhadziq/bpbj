@@ -4,6 +4,7 @@ import { contacts, user as userTable } from '../db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { verifyAuth, requireRole } from '../middlewares/auth';
 import { validateConfirmationText, validateContactPayload, validateContactReplyPayload, validateContactStatus, validateUuid } from '../utils/validation';
+import { createId } from '../utils/id';
 
 const router = Router();
 
@@ -14,6 +15,7 @@ router.post('/', async (req, res) => {
     if (!payload.ok) return res.status(400).json({ error: payload.error });
     
     const newContact = await db.insert(contacts).values({
+      id: createId(),
       name: payload.data.name,
       email: payload.data.email,
       subject: payload.data.subject,

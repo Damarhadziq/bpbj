@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import FloatingServiceWidget from './components/FloatingServiceWidget';
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
 import GalleryPage from './pages/GalleryPage';
@@ -21,9 +22,21 @@ import AdminContacts from './pages/admin/AdminContacts';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminCarousel from './pages/admin/AdminCarousel';
 import AdminServiceLinks from './pages/admin/AdminServiceLinks';
+import AdminFloatingWidgets from './pages/admin/AdminFloatingWidgets';
 import AdminEmployees from './pages/admin/AdminEmployees';
 import AdminRegulations from './pages/admin/AdminRegulations';
 import { trackVisit } from './utils/visitorTracker';
+
+function PublicLayout({ children }) {
+  return (
+    <div className="flex min-h-screen flex-col">
+      <Navbar />
+      {children}
+      <Footer />
+      <FloatingServiceWidget />
+    </div>
+  );
+}
 
 function App() {
   useEffect(() => {
@@ -42,6 +55,7 @@ function App() {
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="carousel" element={<AdminCarousel />} />
+            <Route path="floating-widgets" element={<AdminFloatingWidgets />} />
             <Route path="news" element={<AdminNews />} />
             <Route path="gallery" element={<AdminGallery />} />
             <Route path="service-links" element={<AdminServiceLinks />} />
@@ -60,53 +74,39 @@ function App() {
 
         {/* Public Routes */}
         <Route path="/" element={
-          <div className="flex min-h-screen flex-col">
-            <Navbar />
+          <PublicLayout>
             <HomePage />
-            <Footer />
-          </div>
+          </PublicLayout>
         } />
         <Route path="/profile" element={
-          <div className="flex min-h-screen flex-col">
-            <Navbar />
+          <PublicLayout>
             <ProfilePage />
-            <Footer />
-          </div>
+          </PublicLayout>
         } />
         <Route path="/gallery" element={
-          <div className="flex min-h-screen flex-col">
-            <Navbar />
+          <PublicLayout>
             <GalleryPage />
-            <Footer />
-          </div>
+          </PublicLayout>
         } />
         <Route path="/gallery/:id" element={
-          <div className="flex min-h-screen flex-col">
-            <Navbar />
+          <PublicLayout>
             <GalleryDetailPage />
-            <Footer />
-          </div>
+          </PublicLayout>
         } />
         <Route path="/contact" element={
-          <div className="flex min-h-screen flex-col">
-            <Navbar />
+          <PublicLayout>
             <ContactPage />
-            <Footer />
-          </div>
+          </PublicLayout>
         } />
         <Route path="/news" element={
-          <div className="flex min-h-screen flex-col">
-            <Navbar />
+          <PublicLayout>
             <NewsPage />
-            <Footer />
-          </div>
+          </PublicLayout>
         } />
         <Route path="/news/:id" element={
-          <div className="flex min-h-screen flex-col">
-            <Navbar />
+          <PublicLayout>
             <NewsDetailPage />
-            <Footer />
-          </div>
+          </PublicLayout>
         } />
       </Routes>
     </BrowserRouter>

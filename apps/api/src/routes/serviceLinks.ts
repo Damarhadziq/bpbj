@@ -4,6 +4,7 @@ import { db } from '../config/db';
 import { serviceLinks } from '../db/schema';
 import { verifyAuth, requireRole } from '../middlewares/auth';
 import { validateServiceLinkPayload, validateUuid } from '../utils/validation';
+import { createId } from '../utils/id';
 
 const router = Router();
 
@@ -22,7 +23,7 @@ router.post('/', verifyAuth, requireRole(['admin', 'superadmin']), async (req, r
     const payload = validateServiceLinkPayload(req.body);
     if (!payload.ok) return res.status(400).json({ error: payload.error });
 
-    const created = await db.insert(serviceLinks).values(payload.data).returning();
+    const created = await db.insert(serviceLinks).values({ id: createId(), ...payload.data }).returning();
     return res.status(201).json(created[0]);
   } catch (error) {
     console.error(error);
